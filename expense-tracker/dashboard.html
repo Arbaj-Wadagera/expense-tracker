@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Expense Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="dashboard">
+        <h2>Welcome to Your Expense Tracker</h2>
+        <button id="logout-btn">Logout</button>
+
+        <h3>Add Expense</h3>
+        <input type="text" id="expense-name" placeholder="Expense Name">
+        <input type="number" id="expense-amount" placeholder="Amount">
+        <button id="add-expense-btn">Add Expense</button>
+
+        <h3>Expense List</h3>
+        <ul id="expense-list"></ul>
+    </div>
+
+    <script type="module" src="firebase-config.js"></script>
+    <script type="module" src="app.js"></script>
+</body>
+</html>
