@@ -33,7 +33,7 @@
             --danger-color: #e74c3c;
             --light-bg: #20232A;        /* Dark background for body */
             --text-color: #ecf0f1;       /* Light text on dark background */
-            --card-bg: #2c3038;        /* Darker card background */
+            --card-bg: #2c3038;       /* Darker card background */
             --table-header-bg: #34495e;
             --table-header-text: #ecf0f1;
             --input-group-text-bg: #3498db;
@@ -232,10 +232,15 @@
                 <p id="current-date" class="text-muted"></p>
             </header>
 
+            <div class="mb-4 dashboard-card p-3">
+                <label for="month-year-selector" class="form-label fw-bold">Select Month to View/Edit:</label>
+                <input type="month" id="month-year-selector" class="form-control" style="max-width: 280px;">
+            </div>
+
             <div class="row">
                 <div class="col-lg-4 mb-4">
                     <div class="dashboard-card">
-                        <h4 class="mb-4 header-text-color"><i class="bi bi-plus-circle me-2" style="color: var(--secondary-color);"></i>New Expense</h4>
+                        <h4 class="mb-4 header-text-color"><i class="bi bi-plus-circle me-2" style="color: var(--secondary-color);"></i>New Expense for <span id="form-month-year-display" class="fw-normal"></span></h4>
                         <form id="expense-form">
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Expense Name</label>
@@ -284,9 +289,9 @@
                 <div class="col-lg-8">
                     <div class="dashboard-card">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h4 class="header-text-color"><i class="bi bi-card-list me-2" style="color: var(--secondary-color);"></i>Monthly Summary</h4>
-                            <button class="btn btn-sm btn-outline-danger" onclick="window.clearAllExpenses()">
-                                <i class="bi bi-trash3 me-1"></i> Clear All
+                            <h4 class="header-text-color"><i class="bi bi-card-list me-2" style="color: var(--secondary-color);"></i>Summary for <span id="summary-month-year-display" class="fw-normal"></span></h4>
+                            <button id="clear-month-expenses-button" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash3 me-1"></i> Clear Month's Expenses
                             </button>
                         </div>
                         <div class="table-responsive">
@@ -301,20 +306,20 @@
                                     </tr>
                                 </thead>
                                 <tbody id="expense-list">
-                                </tbody>
+                                    </tbody>
                             </table>
                         </div>
-                        <p class="text-end mt-3 fw-bold">Total: <span id="total-expenses-display">₹0.00</span></p>
+                        <p class="text-end mt-3 fw-bold">Total Expenses for Month: <span id="total-expenses-display">₹0.00</span></p>
                     </div>
                 </div>
             </div>
 
             <div class="stats-box dashboard-card">
-                <h3 class="header-text-color"><i class="bi bi-cash-coin me-2" style="color: var(--success-color);"></i>Monthly Budget</h3>
+                <h3 class="header-text-color"><i class="bi bi-cash-coin me-2" style="color: var(--success-color);"></i>Budget for <span id="budget-month-year-display" class="fw-normal"></span></h3>
                 <form id="budget-form" class="mb-3 mt-3 d-flex justify-content-center">
                     <div class="input-group w-auto">
                         <span class="input-group-text">₹</span>
-                        <input type="number" class="form-control" id="monthly-budget" placeholder="Set Budget" style="max-width: 150px;" required>
+                        <input type="number" class="form-control" id="monthly-budget-input" placeholder="Set Budget for Month" style="max-width: 200px;" required>
                         <button type="submit" class="btn btn-success">
                             <i class="bi bi-check-circle me-1"></i>Set
                         </button>
@@ -336,23 +341,16 @@
             </div>
             
             <button class="btn btn-secondary mt-3" onclick="window.printExpenses()">
-                <i class="bi bi-printer me-2"></i>Print Expenses
+                <i class="bi bi-printer me-2"></i>Print Expenses for <span id="print-month-year-display" class="fw-normal"></span>
             </button>
         </div> 
     </div>
 
     <script type="module">
-        // Import necessary Firebase functions
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, addDoc, getDoc, getDocs, query, where, orderBy, deleteDoc, writeBatch, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        // ****************************************************************************************
-        // !! IMPORTANT !! 
-        // If this exact firebaseConfig is working for your "funds-tracking" project, 
-        // and you can see data in YOUR Firebase console for that project, then keep it.
-        // Otherwise, replace it with the config from YOUR Firebase project settings.
-        // ****************************************************************************************
         const firebaseConfig = {
             apiKey: "AIzaSyDhZ98wMP9aLgiaFei_8BLQDhK71pJfTWA", 
             authDomain: "funds-tracking.firebaseapp.com",
@@ -363,7 +361,6 @@
             measurementId: "G-Y0XBHVFY98" 
         };
 
-        // Initialize Firebase
         console.log("Initializing Firebase app...");
         let app;
         let auth;
@@ -376,20 +373,21 @@
         } catch (error) {
             console.error("Firebase initialization error:", error);
             alert("Could not initialize Firebase. Please check your configuration and ensure Firebase services are enabled for your project. See console for details.");
-            // You might want to disable app functionality here if Firebase doesn't initialize
         }
 
-
         let currentUser = null;
-        let currentUserName = ""; // To store user's name
-        let expenses = [];
-        let budget = 0;
-        let totalExpenses = 0;
+        let currentUserName = "";
+        let selectedMonthYear = ""; // YYYY-MM format
+        let currentMonthExpenses = [];
+        let currentMonthBudget = 0;
+        let totalMonthExpenses = 0;
+
 
         // DOM Elements
         const currentDateEl = document.getElementById('current-date');
+        const monthYearSelector = document.getElementById('month-year-selector');
         const budgetForm = document.getElementById('budget-form');
-        const monthlyBudgetInput = document.getElementById('monthly-budget');
+        const monthlyBudgetInput = document.getElementById('monthly-budget-input');
         const expenseForm = document.getElementById('expense-form');
         const expenseNameInput = document.getElementById('expense-name');
         const expenseAmountInput = document.getElementById('expense-amount');
@@ -403,6 +401,12 @@
         const totalExpensesDisplayEl = document.getElementById('total-expenses-display');
         const budgetProgressBar = document.getElementById('budget-progress-bar');
         const themeToggleButton = document.getElementById('theme-toggle-button'); 
+        const clearMonthExpensesButton = document.getElementById('clear-month-expenses-button');
+
+        const formMonthYearDisplay = document.getElementById('form-month-year-display');
+        const summaryMonthYearDisplay = document.getElementById('summary-month-year-display');
+        const budgetMonthYearDisplay = document.getElementById('budget-month-year-display');
+        const printMonthYearDisplay = document.getElementById('print-month-year-display');
 
         const authContainer = document.getElementById('auth-container');
         const loginView = document.getElementById('login-view');
@@ -420,7 +424,6 @@
         const logoutButton = document.getElementById('logout-button');
         const appContent = document.getElementById('app-content');
 
-
         // --- Theme Toggle Logic ---
         function applyTheme(theme) {
             if (theme === 'dark') {
@@ -433,15 +436,12 @@
                 localStorage.setItem('theme', 'light');
             }
         }
-
         themeToggleButton.addEventListener('click', () => {
             const currentTheme = localStorage.getItem('theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
             applyTheme(currentTheme === 'light' ? 'dark' : 'light');
         });
-        
         const savedTheme = localStorage.getItem('theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         applyTheme(savedTheme);
-
 
         // --- Authentication UI Toggling ---
         function switchAuthView(viewToShow) {
@@ -457,33 +457,21 @@
 
         // --- Firebase Collection Constants ---
         const USERS_COLLECTION = 'users';
-        const BUDGET_COLLECTION = 'budgets'; 
-        const EXPENSES_COLLECTION = 'expenses';
+        const MONTHLY_BUDGETS_SUBCOLLECTION = 'monthlyBudgets'; // Subcollection under user
+        const EXPENSES_COLLECTION = 'expenses'; // Top-level collection for expenses
 
         // --- User Profile Management ---
         async function saveUserProfile(userId, name, email) {
             if (!db) { console.error("Firestore not initialized."); return; }
-            console.log(`Attempting to save user profile for ${userId}: Name - ${name}`);
             try {
                 const userDocRef = doc(db, USERS_COLLECTION, userId);
-                await setDoc(userDocRef, {
-                    name: name,
-                    email: email, 
-                    createdAt: serverTimestamp() 
-                }, { merge: true }); 
-                console.log("User profile saved successfully to Firestore.");
+                await setDoc(userDocRef, { name: name, email: email, createdAt: serverTimestamp() }, { merge: true }); 
                 currentUserName = name; 
-            } catch (error) {
-                console.error("Error saving user profile to Firestore: ", error);
-                // alert("Error saving user profile information. Check console for details.");
-            }
+            } catch (error) { console.error("Error saving user profile to Firestore: ", error); }
         }
-
         async function loadUserProfile(userId) {
             if (!db) { console.error("Firestore not initialized."); return; }
-            console.log(`Loading user profile for ${userId}`);
-            if (!userId || !currentUser) { // Ensure currentUser is available for email fallback
-                console.warn("loadUserProfile called with no userId or currentUser not set.");
+            if (!userId || !currentUser) { 
                 if(userIdentityDisplay) userIdentityDisplay.textContent = currentUser ? currentUser.email : "Guest"; 
                 return;
             }
@@ -493,103 +481,68 @@
                 if (userDocSnap.exists()) {
                     const userData = userDocSnap.data();
                     currentUserName = userData.name || ""; 
-                    console.log("User profile loaded from Firestore:", currentUserName);
                     if(userIdentityDisplay) userIdentityDisplay.textContent = currentUserName || currentUser.email;
                 } else {
-                    console.log("No user profile document found in Firestore. Displaying email as fallback.");
                     currentUserName = ""; 
                     if(userIdentityDisplay) userIdentityDisplay.textContent = currentUser.email;
                 }
             } catch (error) {
                 console.error("Error loading user profile from Firestore:", error);
-                 if(userIdentityDisplay) userIdentityDisplay.textContent = currentUser.email; 
+                if(userIdentityDisplay) userIdentityDisplay.textContent = currentUser.email; 
             }
         }
 
         // --- Authentication Logic ---
-        if (auth) { // Only add auth listeners if auth initialized
+        if (auth) {
             signupForm.addEventListener('submit', async (e) => { 
                 e.preventDefault(); 
                 const name = document.getElementById('signup-name').value.trim();
                 const email = document.getElementById('signup-email').value.trim(); 
                 const password = document.getElementById('signup-password').value; 
-                
                 if (!name) { alert("Please enter your name."); return; }
                 if (password.length < 6) { alert("Password must be at least 6 characters long."); return; }
-
-                console.log("Attempting signup for:", email); 
                 try {
                     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                    console.log("Firebase Auth: Signup successful for:", userCredential.user.email);
                     await saveUserProfile(userCredential.user.uid, name, email); 
                     signupForm.reset(); 
-                } catch (error) {
-                    console.error("Signup Error:", error.code, error.message); 
-                    alert(`Signup Error: ${error.message}`); 
-                }
+                } catch (error) { alert(`Signup Error: ${error.message}`); }
             });
-
             loginForm.addEventListener('submit', async (e) => { 
                 e.preventDefault(); 
                 const email = document.getElementById('login-email').value.trim(); 
                 const password = document.getElementById('login-password').value; 
-                console.log("Attempting login for:", email); 
                 try {
-                    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                    console.log("Login successful:", userCredential.user.email); 
+                    await signInWithEmailAndPassword(auth, email, password);
                     loginForm.reset(); 
-                } catch (error) {
-                    console.error("Login Error:", error.code, error.message); 
-                    alert(`Login Error: ${error.message}`); 
-                }
+                } catch (error) { alert(`Login Error: ${error.message}`); }
             });
-
             forgotPasswordForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const email = document.getElementById('forgot-email').value.trim();
-                console.log("Attempting password reset for:", email);
                 try {
                     await sendPasswordResetEmail(auth, email);
-                    console.log("Password reset email sent.");
                     alert("Password reset email sent! Check your inbox (and spam folder).");
                     forgotPasswordForm.reset();
                     switchAuthView(loginView);
-                } catch (error) {
-                    console.error("Password Reset Error:", error.code, error.message);
-                    alert(`Password Reset Error: ${error.message}`);
-                }
+                } catch (error) { alert(`Password Reset Error: ${error.message}`);}
             });
-
             logoutButton.addEventListener('click', async () => { 
-                console.log("Attempting logout..."); 
-                try {
-                    await signOut(auth);
-                    console.log("User signed out successfully."); 
-                } catch (error) {
-                    console.error("Sign out error:", error.code, error.message); 
-                }
+                try { await signOut(auth); } catch (error) { console.error("Sign out error:", error); }
             });
 
             onAuthStateChanged(auth, async (user) => { 
                 if (user) { 
                     currentUser = user; 
-                    console.log("Auth state changed: User is logged in.", currentUser.uid); 
                     await loadUserProfile(currentUser.uid); 
-                    
                     authContainer.style.display = 'block'; 
-                    switchAuthView(null); // Hide all auth forms initially
-                    loginView.style.display = 'none'; 
-                    signupView.style.display = 'none';
-                    forgotPasswordView.style.display = 'none';
+                    switchAuthView(null); 
+                    loginView.style.display = 'none'; signupView.style.display = 'none'; forgotPasswordView.style.display = 'none';
                     userInfoDiv.style.display = 'block'; 
                     appContent.style.display = 'block'; 
-                    await loadDataFromFirestore(); 
+                    setDefaultMonthYear(); // This will also trigger loadDataForSelectedMonth
                 } else { 
-                    currentUser = null; 
-                    currentUserName = "";
-                    console.log("Auth state changed: User is logged out."); 
-                    expenses = []; budget = 0; totalExpenses = 0; 
-                    
+                    currentUser = null; currentUserName = ""; 
+                    selectedMonthYear = ""; currentMonthExpenses = []; currentMonthBudget = 0; totalMonthExpenses = 0;
                     authContainer.style.display = 'block'; 
                     switchAuthView(loginView); 
                     userInfoDiv.style.display = 'none'; 
@@ -601,83 +554,211 @@
             });
         } else {
             console.error("Auth service not available. App functionality will be limited.");
-            // Hide parts of the UI that depend on Firebase
             appContent.style.display = 'none';
             authContainer.innerHTML = '<p class="text-danger text-center">Firebase is not configured correctly. App cannot run.</p>';
         }
 
-
-        // --- Firestore Data Handling --- (Ensure db is initialized before calling these)
-        async function saveBudgetToFirestore() { if (!currentUser || !db) { console.warn("Cannot save budget, no user logged in or DB not init."); return; } console.log(`Saving budget for user ${currentUser.uid}: ${budget}`); try { const budgetDocRef = doc(db, BUDGET_COLLECTION, currentUser.uid); await setDoc(budgetDocRef, { amount: budget, lastUpdated: serverTimestamp() }); console.log("Budget saved successfully to Firestore."); } catch (error) { console.error("Error saving budget to Firestore: ", error); alert("Error saving budget."); } }
-        async function loadDataFromFirestore() { 
-            if (!currentUser || !db) { console.warn("Cannot load data, no user logged in or DB not init."); return; } 
-            console.log(`Loading budget and expenses for user ${currentUser.uid}...`);
-            try { 
-                const budgetDocRef = doc(db, BUDGET_COLLECTION, currentUser.uid); 
-                const budgetDocSnap = await getDoc(budgetDocRef); 
-                if (budgetDocSnap.exists()) { budget = budgetDocSnap.data().amount || 0; console.log("Budget loaded:", budget); } 
-                else { budget = 0; console.log("No budget document found for user. Setting budget to 0."); } 
-            } catch (error) { console.error("Error loading budget from Firestore: ", error); budget = 0; } 
-            try { 
-                const expensesQuery = query( collection(db, EXPENSES_COLLECTION), where("userId", "==", currentUser.uid), orderBy("date", "desc") ); 
-                const expensesSnapshot = await getDocs(expensesQuery); 
-                expenses = []; 
-                expensesSnapshot.forEach(docSnap => { expenses.push({ id: docSnap.id, ...docSnap.data() }); }); 
-                console.log(`Loaded ${expenses.length} expenses from Firestore.`);
-            } catch (error) { console.error("Error loading expenses from Firestore: ", error); expenses = []; } 
-            updateExpenseList(); 
+        // --- Month and Year Selection ---
+        function setDefaultMonthYear() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = (today.getMonth() + 1).toString().padStart(2, '0'); // Ensure MM format
+            selectedMonthYear = `${year}-${month}`;
+            monthYearSelector.value = selectedMonthYear;
+            updateSelectedMonthDisplaySpans();
+            loadDataForSelectedMonth();
         }
-        async function deleteExpenseFromFirestore(expenseId) { if (!currentUser || !db) { console.warn("Cannot delete, no user or DB not init."); return; } console.log(`Attempting to delete expense ${expenseId}`); try { const expenseDocRef = doc(db, EXPENSES_COLLECTION, expenseId); await deleteDoc(expenseDocRef); console.log("Expense deleted successfully from Firestore:", expenseId); } catch (error) { console.error("Error deleting expense from Firestore: ", error); alert("Error deleting expense."); throw error; } }
-        async function clearAllExpensesFromFirestore() { if (!currentUser || !db) { console.warn("Cannot clear, no user or DB not init."); return; } console.log(`Attempting to clear all expenses for user ${currentUser.uid}`); try { const expensesQuery = query( collection(db, EXPENSES_COLLECTION), where("userId", "==", currentUser.uid) ); const expensesSnapshot = await getDocs(expensesQuery); if (expensesSnapshot.empty) { console.log("No expenses to clear for user."); return; } const batch = writeBatch(db); expensesSnapshot.forEach(docSnap => { batch.delete(docSnap.ref); }); await batch.commit(); console.log("All expenses cleared successfully from Firestore for user:", currentUser.uid); } catch (error) { console.error("Error clearing all expenses from Firestore: ", error); alert("Error clearing all expenses."); throw error; } }
+
+        monthYearSelector.addEventListener('change', () => {
+            selectedMonthYear = monthYearSelector.value;
+            if (selectedMonthYear) {
+                updateSelectedMonthDisplaySpans();
+                loadDataForSelectedMonth();
+                // Set default date for new expense to the first of the selected month
+                expenseDateInput.value = selectedMonthYear + '-01';
+            }
+        });
+        
+        function updateSelectedMonthDisplaySpans() {
+            if (!selectedMonthYear) return;
+            const [year, month] = selectedMonthYear.split('-');
+            const displayDate = new Date(parseInt(year), parseInt(month) - 1).toLocaleString('default', { month: 'long', year: 'numeric' });
+            
+            if (formMonthYearDisplay) formMonthYearDisplay.textContent = displayDate;
+            if (summaryMonthYearDisplay) summaryMonthYearDisplay.textContent = displayDate;
+            if (budgetMonthYearDisplay) budgetMonthYearDisplay.textContent = displayDate;
+            if (printMonthYearDisplay) printMonthYearDisplay.textContent = displayDate;
+        }
+
+
+        // --- Firestore Data Handling for Selected Month ---
+        async function saveBudgetToFirestore() {
+            if (!currentUser || !db || !selectedMonthYear) { console.warn("Cannot save budget."); return; }
+            const newBudgetAmount = parseFloat(monthlyBudgetInput.value);
+            if (isNaN(newBudgetAmount) || newBudgetAmount < 0) { 
+                alert("Please enter a valid budget amount."); 
+                return; // Don't clear input if invalid
+            }
+            currentMonthBudget = newBudgetAmount; // Optimistic update for UI
+            
+            try {
+                const budgetDocRef = doc(db, USERS_COLLECTION, currentUser.uid, MONTHLY_BUDGETS_SUBCOLLECTION, selectedMonthYear);
+                await setDoc(budgetDocRef, { amount: currentMonthBudget, lastUpdated: serverTimestamp() });
+                console.log(`Budget for ${selectedMonthYear} saved: ${currentMonthBudget}`);
+                monthlyBudgetInput.value = ''; // Clear input only on success
+                updateBudgetUI(); // Update UI with the new budget
+            } catch (error) {
+                console.error(`Error saving budget for ${selectedMonthYear}: `, error);
+                alert("Error saving budget.");
+                // Potentially revert optimistic update if needed, or reload data
+            }
+        }
+
+        async function loadDataForSelectedMonth() { 
+            if (!currentUser || !db || !selectedMonthYear) { console.warn("Cannot load data for month."); return; } 
+            console.log(`Loading data for user ${currentUser.uid}, month ${selectedMonthYear}...`);
+            
+            // Reset current month's data
+            currentMonthBudget = 0;
+            currentMonthExpenses = [];
+
+            // Load Budget for selected month
+            try { 
+                const budgetDocRef = doc(db, USERS_COLLECTION, currentUser.uid, MONTHLY_BUDGETS_SUBCOLLECTION, selectedMonthYear);
+                const budgetDocSnap = await getDoc(budgetDocRef); 
+                if (budgetDocSnap.exists()) { 
+                    currentMonthBudget = budgetDocSnap.data().amount || 0; 
+                    console.log(`Budget for ${selectedMonthYear} loaded: ${currentMonthBudget}`); 
+                } else { 
+                    console.log(`No budget document found for ${selectedMonthYear}. Setting budget to 0.`); 
+                }
+            } catch (error) { console.error(`Error loading budget for ${selectedMonthYear}: `, error); currentMonthBudget = 0; } 
+            
+            // Load Expenses for selected month
+            try {
+                const startDate = selectedMonthYear + "-01";
+                const [year, month] = selectedMonthYear.split('-').map(Number);
+                const nextMonthDate = new Date(year, month, 1); // month is 0-indexed for Date constructor, but `month` var is 1-indexed
+                const endDate = `${nextMonthDate.getFullYear()}-${(nextMonthDate.getMonth() + 1).toString().padStart(2, '0')}-01`;
+
+                const expensesQuery = query( 
+                    collection(db, EXPENSES_COLLECTION), 
+                    where("userId", "==", currentUser.uid),
+                    where("date", ">=", startDate),
+                    where("date", "<", endDate), // Expenses on the first day of next month are excluded
+                    orderBy("date", "desc") 
+                ); 
+                const expensesSnapshot = await getDocs(expensesQuery); 
+                expensesSnapshot.forEach(docSnap => { currentMonthExpenses.push({ id: docSnap.id, ...docSnap.data() }); }); 
+                console.log(`Loaded ${currentMonthExpenses.length} expenses for ${selectedMonthYear}.`);
+            } catch (error) { console.error(`Error loading expenses for ${selectedMonthYear}: `, error); currentMonthExpenses = []; } 
+            
+            updateExpenseList(); // This will also call updateBudgetUI
+        }
+        
+        async function deleteExpenseFromFirestore(expenseId) { 
+            if (!currentUser || !db) { console.warn("Cannot delete, no user or DB not init."); return; } 
+            try { 
+                const expenseDocRef = doc(db, EXPENSES_COLLECTION, expenseId); 
+                await deleteDoc(expenseDocRef); 
+                console.log("Expense deleted successfully from Firestore:", expenseId); 
+            } catch (error) { console.error("Error deleting expense from Firestore: ", error); alert("Error deleting expense."); throw error; } 
+        }
+        
+        async function clearMonthExpensesFromFirestore() { 
+            if (!currentUser || !db || !selectedMonthYear) { console.warn("Cannot clear, no user/DB/month."); return; } 
+            console.log(`Attempting to clear all expenses for user ${currentUser.uid} in month ${selectedMonthYear}`); 
+            try { 
+                const startDate = selectedMonthYear + "-01";
+                const [year, month] = selectedMonthYear.split('-').map(Number);
+                const nextMonthDate = new Date(year, month, 1);
+                const endDate = `${nextMonthDate.getFullYear()}-${(nextMonthDate.getMonth() + 1).toString().padStart(2, '0')}-01`;
+
+                const expensesQuery = query( 
+                    collection(db, EXPENSES_COLLECTION), 
+                    where("userId", "==", currentUser.uid),
+                    where("date", ">=", startDate),
+                    where("date", "<", endDate)
+                ); 
+                const expensesSnapshot = await getDocs(expensesQuery); 
+                if (expensesSnapshot.empty) { console.log(`No expenses to clear for ${selectedMonthYear}.`); return; } 
+                const batch = writeBatch(db); 
+                expensesSnapshot.forEach(docSnap => { batch.delete(docSnap.ref); }); 
+                await batch.commit(); 
+                console.log(`All expenses for ${selectedMonthYear} cleared successfully from Firestore.`); 
+            } catch (error) { console.error(`Error clearing expenses for ${selectedMonthYear}: `, error); alert("Error clearing month's expenses."); throw error; } 
+        }
 
         // --- Event Listeners & UI Update Functions ---
-        budgetForm.addEventListener('submit', async function(event) { event.preventDefault(); if (!currentUser || !db) { alert("Please log in to set a budget. Firebase not available."); return; } const newBudget = parseFloat(monthlyBudgetInput.value); if (isNaN(newBudget) || newBudget < 0) { alert("Please enter a valid budget amount."); return; } budget = newBudget; monthlyBudgetInput.value = ''; await saveBudgetToFirestore(); updateBudgetUI(); });
+        budgetForm.addEventListener('submit', async function(event) { 
+            event.preventDefault(); 
+            if (!currentUser || !db) { alert("Please log in to set a budget."); return; } 
+            await saveBudgetToFirestore(); 
+        });
+
         expenseForm.addEventListener('submit', async function(event) { 
             event.preventDefault(); 
-            if (!currentUser || !db) { alert("Please log in to add expenses. Firebase not available."); return; } 
+            if (!currentUser || !db) { alert("Please log in to add expenses."); return; } 
             const name = expenseNameInput.value.trim(); 
             const amount = parseFloat(expenseAmountInput.value); 
             const category = expenseCategoryInput.value; 
-            const dateStr = expenseDateInput.value; 
+            const dateStr = expenseDateInput.value; // YYYY-MM-DD
             if (!name || isNaN(amount) || amount <= 0 || !category || !dateStr) { alert("Please fill in all fields with valid data."); return; } 
+            
+            const expenseMonthYear = dateStr.substring(0, 7); // YYYY-MM from expense date
+
             const newExpenseData = { name, amount, category, date: dateStr, userId: currentUser.uid, createdAt: serverTimestamp() }; 
             try { 
                 const docRef = await addDoc(collection(db, EXPENSES_COLLECTION), newExpenseData); 
-                expenses.push({ id: docRef.id, ...newExpenseData, createdAt: new Date() }); 
-                updateExpenseList(); 
+                
+                // If the added expense is for the currently selected month, update list
+                if (expenseMonthYear === selectedMonthYear) {
+                    currentMonthExpenses.push({ id: docRef.id, ...newExpenseData, createdAt: new Date() }); // Approx createdAt for local sort
+                    updateExpenseList(); 
+                } else {
+                    // If added to a different month, just inform or simply don't update current view
+                    console.log(`Expense added for ${expenseMonthYear}, current view is ${selectedMonthYear}.`);
+                    alert(`Expense for ${new Date(dateStr).toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'})} added successfully. View that month to see it.`);
+                }
                 expenseForm.reset(); 
+                // Reset date input to first of currently selected month
+                if (selectedMonthYear) expenseDateInput.value = selectedMonthYear + '-01';
             } catch (error) { console.error("Error adding expense to Firestore: ", error); alert("Failed to add expense."); } 
         });
         
         function updateBudgetUI() { 
-            totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
-            let remaining = budget - totalExpenses;
-            currentBudgetDisplayEl.innerText = `₹${budget.toFixed(2)}`;
-            spentBudgetDisplayEl.innerText = `₹${totalExpenses.toFixed(2)}`;
+            totalMonthExpenses = currentMonthExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+            let remaining = currentMonthBudget - totalMonthExpenses;
+            
+            currentBudgetDisplayEl.innerText = `₹${currentMonthBudget.toFixed(2)}`;
+            spentBudgetDisplayEl.innerText = `₹${totalMonthExpenses.toFixed(2)}`;
             remainingBudgetEl.innerText = `₹${remaining.toFixed(2)}`;
-            let spentPercentage = budget > 0 ? Math.min(100, (totalExpenses / budget) * 100) : 0;
+            
+            let spentPercentage = currentMonthBudget > 0 ? Math.min(100, (totalMonthExpenses / currentMonthBudget) * 100) : 0;
             spentPercentage = Math.max(0, spentPercentage); 
+            
             percentageSpentEl.innerText = `${spentPercentage.toFixed(1)}%`;
             remainingBudgetEl.style.color = remaining < 0 ? 'var(--danger-color)' : 'var(--success-color)';
             budgetProgressBar.style.width = `${spentPercentage}%`;
             budgetProgressBar.innerText = `${spentPercentage.toFixed(0)}%`;
             budgetProgressBar.setAttribute('aria-valuenow', spentPercentage);
-            budgetProgressBar.style.backgroundColor = (spentPercentage >= 100 && budget > 0) ? 'var(--danger-color)' : 'var(--secondary-color)';
-            totalExpensesDisplayEl.innerText = `₹${totalExpenses.toFixed(2)}`;
+            budgetProgressBar.style.backgroundColor = (spentPercentage >= 100 && currentMonthBudget > 0 && totalMonthExpenses > currentMonthBudget) ? 'var(--danger-color)' : 'var(--secondary-color)';
+            totalExpensesDisplayEl.innerText = `₹${totalMonthExpenses.toFixed(2)}`;
         }
 
         function updateExpenseList() {
             expenseListEl.innerHTML = "";
-            expenses.sort((a, b) => { 
-                const dateA = (a.date instanceof Timestamp) ? a.date.toDate().toISOString().split('T')[0] : a.date;
-                const dateB = (b.date instanceof Timestamp) ? b.date.toDate().toISOString().split('T')[0] : b.date;
-                if (dateA < dateB) return 1; if (dateA > dateB) return -1; return 0;
+            currentMonthExpenses.sort((a, b) => { 
+                 // Date is string "YYYY-MM-DD" or a Firebase Timestamp if just added/loaded differently
+                const dateAStr = (a.date instanceof Timestamp) ? a.date.toDate().toISOString().split('T')[0] : a.date;
+                const dateBStr = (b.date instanceof Timestamp) ? b.date.toDate().toISOString().split('T')[0] : b.date;
+                return dateBStr.localeCompare(dateAStr); // Descending by date string
             });
 
-            if (expenses.length === 0) {
-                expenseListEl.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No expenses added yet.</td></tr>';
+            if (currentMonthExpenses.length === 0) {
+                expenseListEl.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No expenses added for ${selectedMonthYear ? new Date(selectedMonthYear + '-01').toLocaleString('default', {month:'long', year:'numeric'}) : 'this month'} yet.</td></tr>`;
             } else {
-                expenses.forEach(expense => {
+                currentMonthExpenses.forEach(expense => {
                     let displayDate;
                     if (expense.date instanceof Timestamp) {
                         displayDate = expense.date.toDate().toLocaleDateString('en-GB'); 
@@ -705,36 +786,55 @@
         
         window.deleteExpense = async function(id) { 
             if (!currentUser || !id || !db) return;
-            const originalExpenses = [...expenses];
-            expenses = expenses.filter(expense => expense.id !== id);
-            updateExpenseList(); 
+            const originalExpenses = [...currentMonthExpenses];
+            currentMonthExpenses = currentMonthExpenses.filter(expense => expense.id !== id);
+            updateExpenseList(); // Optimistic UI update
             try { await deleteExpenseFromFirestore(id); } 
-            catch (error) { expenses = originalExpenses; updateExpenseList(); }
-        }
-        window.clearAllExpenses = async function() { 
-            if (!currentUser || !db) return;
-            if (confirm("Are you sure you want to clear all expenses? This action cannot be undone.")) {
-                const originalExpenses = [...expenses]; expenses = []; updateExpenseList(); 
-                try { await clearAllExpensesFromFirestore(); } 
-                catch (error) { expenses = originalExpenses; updateExpenseList(); }
+            catch (error) { 
+                currentMonthExpenses = originalExpenses; // Revert on error
+                updateExpenseList(); 
             }
         }
+        
+        clearMonthExpensesButton.addEventListener('click', async () => {
+            if (!currentUser || !db || !selectedMonthYear) return;
+            const monthToClear = new Date(selectedMonthYear + '-01').toLocaleString('default', { month: 'long', year: 'numeric' });
+            if (confirm(`Are you sure you want to clear all expenses for ${monthToClear}? This action cannot be undone.`)) {
+                const originalExpenses = [...currentMonthExpenses]; 
+                currentMonthExpenses = []; 
+                updateExpenseList(); 
+                try { await clearMonthExpensesFromFirestore(); } 
+                catch (error) { 
+                    currentMonthExpenses = originalExpenses; // Revert on error
+                    updateExpenseList(); 
+                }
+            }
+        });
+
         function escapeHTML(str) { 
             if (typeof str !== 'string') return ''; 
             return str.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
         }
 
         window.printExpenses = function() { 
-            console.log("window.printExpenses called");
+            if (!selectedMonthYear) {
+                alert("Please select a month to print expenses.");
+                return;
+            }
             const printWindow = window.open("", "_blank", "width=1000,height=700");
             if (!printWindow) { alert("Please allow popups to print expenses."); return; }
+            
+            const [year, monthNum] = selectedMonthYear.split('-');
+            const printMonthName = new Date(parseInt(year), parseInt(monthNum) - 1).toLocaleString('en-GB', { month: 'long', year: 'numeric' });
             const printCurrentDate = new Date().toLocaleString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-            const remainingBalance = budget - totalExpenses;
+            const remainingBalance = currentMonthBudget - totalMonthExpenses;
+
             let printContent = `
-                <html><head><title>Expense Report - ${printCurrentDate}</title>
+                <html><head><title>Expense Report - ${printMonthName} - ${printCurrentDate}</title>
                 <style>
                     body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
                     h1 { color: #2c3e50; text-align: center; border-bottom: 2px solid #3498db; padding-bottom: 10px;}
+                    h2 { color: #34495e; margin-top: 25px; }
                     p { font-size: 14px; } .meta-info { text-align: center; margin-bottom: 25px; font-size: 12px; color: #555; }
                     table { width: 100%; border-collapse: collapse; margin-top: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
                     th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 14px; }
@@ -745,15 +845,16 @@
                     .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #777; }
                     .total-row td { font-weight: bold; background-color: #e9ecef; } .amount-col { text-align: right; }
                 </style>
-                </head><body><h1>Expense Report</h1><div class="meta-info">Generated by: ${escapeHTML(currentUserName) || (currentUser ? currentUser.email : 'N/A')} on ${printCurrentDate}</div>
+                </head><body><h1>Expense Report for ${printMonthName}</h1>
+                <div class="meta-info">Generated by: ${escapeHTML(currentUserName) || (currentUser ? currentUser.email : 'N/A')} on ${printCurrentDate}</div>
                 <h2>Expense Details</h2><table><thead><tr>
                 <th>Date</th><th>Expense Name</th><th>Category</th><th class="amount-col">Amount</th>
                 </tr></thead><tbody>`;
             
-            const sortedExpensesForPrint = [...expenses].sort((a, b) => {
+            const sortedExpensesForPrint = [...currentMonthExpenses].sort((a, b) => { // Already sorted by date desc in updateExpenseList, but can re-sort if needed
                 const dateA = (a.date instanceof Timestamp) ? a.date.toDate().toISOString().split('T')[0] : a.date;
                 const dateB = (b.date instanceof Timestamp) ? b.date.toDate().toISOString().split('T')[0] : b.date;
-                if (dateA < dateB) return 1; if (dateA > dateB) return -1; return 0;
+                return dateB.localeCompare(dateA); // Keep descending for print
             });
 
             if (sortedExpensesForPrint.length > 0) {
@@ -773,19 +874,20 @@
                     </tr>`;
                 });
             } else {
-                printContent += `<tr><td colspan="4" style="text-align:center; padding: 20px; color: #777;">No expenses recorded.</td></tr>`;
+                printContent += `<tr><td colspan="4" style="text-align:center; padding: 20px; color: #777;">No expenses recorded for ${printMonthName}.</td></tr>`;
             }
             printContent += `</tbody><tfoot><tr class="total-row">
-                <td colspan="3" style="text-align:right;">Total Expenses:</td>
-                <td class="amount-col">₹${totalExpenses.toFixed(2)}</td></tr></tfoot></table>
+                <td colspan="3" style="text-align:right;">Total Expenses for ${printMonthName}:</td>
+                <td class="amount-col">₹${totalMonthExpenses.toFixed(2)}</td></tr></tfoot></table>
                 <div class="summary">
-                <p>Initial Budget Set: <span style="color: #27ae60;">₹${budget.toFixed(2)}</span></p>
-                <p>Total Amount Spent: <span style="color: #e74c3c;">₹${totalExpenses.toFixed(2)}</span></p>
+                <p>Budget for ${printMonthName}: <span style="color: #27ae60;">₹${currentMonthBudget.toFixed(2)}</span></p>
+                <p>Total Amount Spent: <span style="color: #e74c3c;">₹${totalMonthExpenses.toFixed(2)}</span></p>
                 <p>Remaining Balance: <span style="color: ${remainingBalance >= 0 ? '#27ae60' : '#e74c3c'};">₹${remainingBalance.toFixed(2)}</span></p>
                 </div><div class="footer">Professional Expense Tracker</div></body></html>`;
+            
             printWindow.document.write(printContent);
             printWindow.document.close();
-            setTimeout(() => { printWindow.print(); }, 250);
+            setTimeout(() => { printWindow.print(); }, 250); // Allow content to load before printing
         }
 
         // Initialize UI elements
