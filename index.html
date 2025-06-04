@@ -45,9 +45,9 @@
 
         body {
             background-color: var(--light-bg);
-            color: var(--text-color); /* Changed from --primary-color to --text-color for better theming */
+            color: var(--text-color); 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            transition: background-color 0.3s ease, color 0.3s ease; /* Smooth theme transition */
+            transition: background-color 0.3s ease, color 0.3s ease; 
         }
 
         .container-main {
@@ -56,7 +56,7 @@
             padding: 20px;
         }
 
-        .header-text-color { /* Specific class for header text for theming */
+        .header-text-color { 
              color: var(--primary-color);
         }
 
@@ -67,25 +67,25 @@
             padding: 1.5rem;
             margin-bottom: 1.5rem;
             transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease;
-            border: 1px solid var(--border-color); /* Add border for better definition in dark mode */
+            border: 1px solid var(--border-color); 
         }
         .dashboard-card:hover {
             transform: translateY(-3px);
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
         }
-        .btn-primary { /* Bootstrap primary button */
+        .btn-primary { 
             background-color: var(--secondary-color);
-            border-color: var(--secondary-color); /* Match border */
+            border-color: var(--secondary-color); 
             transition: background-color 0.2s ease, border-color 0.2s ease;
         }
         .btn-primary:hover {
             background-color: #2980b9;
             border-color: #2980b9;
         }
-        .btn-secondary { /* Custom print button */
-            background-color: var(--primary-color); /* This will change with theme */
+        .btn-secondary { 
+            background-color: var(--primary-color); 
             border: none;
-            color: var(--light-bg); /* Text color that contrasts with button's primary */
+            color: var(--light-bg); 
             transition: background-color 0.2s ease;
         }
          .dark-theme .btn-secondary { 
@@ -137,10 +137,10 @@
             background-color: var(--card-bg);
             color: var(--text-color);
             border-color: var(--secondary-color); 
-            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25); /* Using actual RGB for secondary-color */
+            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25); 
         }
          .dark-theme .form-control:focus, .dark-theme .form-select:focus {
-             box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25); /* Ensure secondary color is used for focus in dark theme */
+             box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25); 
          }
 
         .form-label {
@@ -191,7 +191,7 @@
                 <form id="signup-form">
                     <div class="mb-3">
                         <label for="signup-name" class="form-label">Name</label>
-                        <input type="text" class="form-control" id="signup-name" required>
+                        <input type="text" class="form-control" id="signup-name" placeholder="E.g., Arbaj Wadagera" required>
                     </div>
                     <div class="mb-3">
                         <label for="signup-email" class="form-label">Email</label>
@@ -344,26 +344,41 @@
     <script type="module">
         // Import necessary Firebase functions
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"; // Added sendPasswordResetEmail
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, addDoc, getDoc, getDocs, query, where, orderBy, deleteDoc, writeBatch, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        // Your web app's Firebase configuration
+        // ****************************************************************************************
+        // !! IMPORTANT !! 
+        // If this exact firebaseConfig is working for your "funds-tracking" project, 
+        // and you can see data in YOUR Firebase console for that project, then keep it.
+        // Otherwise, replace it with the config from YOUR Firebase project settings.
+        // ****************************************************************************************
         const firebaseConfig = {
-            apiKey: "AIzaSyDhZ98wMP9aLgiaFei_8BLQDhK71pJfTWA", // Replace with your actual API key if different
+            apiKey: "AIzaSyDhZ98wMP9aLgiaFei_8BLQDhK71pJfTWA", 
             authDomain: "funds-tracking.firebaseapp.com",
-            projectId: "funds-tracking",
+            projectId: "funds-tracking", 
             storageBucket: "funds-tracking.appspot.com", 
             messagingSenderId: "256830715551",
             appId: "1:256830715551:web:fc3578819c9eb5851b54aa",
-            measurementId: "G-Y0XBHVFY98"
+            measurementId: "G-Y0XBHVFY98" 
         };
 
         // Initialize Firebase
         console.log("Initializing Firebase app...");
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        console.log("Firebase app initialized.");
+        let app;
+        let auth;
+        let db;
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            console.log("Firebase app initialized successfully.");
+        } catch (error) {
+            console.error("Firebase initialization error:", error);
+            alert("Could not initialize Firebase. Please check your configuration and ensure Firebase services are enabled for your project. See console for details.");
+            // You might want to disable app functionality here if Firebase doesn't initialize
+        }
+
 
         let currentUser = null;
         let currentUserName = ""; // To store user's name
@@ -389,20 +404,19 @@
         const budgetProgressBar = document.getElementById('budget-progress-bar');
         const themeToggleButton = document.getElementById('theme-toggle-button'); 
 
-        // Auth DOM elements
         const authContainer = document.getElementById('auth-container');
         const loginView = document.getElementById('login-view');
         const signupView = document.getElementById('signup-view');
-        const forgotPasswordView = document.getElementById('forgot-password-view'); // New
+        const forgotPasswordView = document.getElementById('forgot-password-view'); 
         const showSignupLink = document.getElementById('show-signup');
-        const showLoginFromSignupLink = document.getElementById('show-login-from-signup'); // Changed ID
-        const showLoginFromForgotLink = document.getElementById('show-login-from-forgot'); // New
-        const showForgotPasswordLink = document.getElementById('show-forgot-password'); // New
+        const showLoginFromSignupLink = document.getElementById('show-login-from-signup'); 
+        const showLoginFromForgotLink = document.getElementById('show-login-from-forgot'); 
+        const showForgotPasswordLink = document.getElementById('show-forgot-password'); 
         const loginForm = document.getElementById('login-form');
         const signupForm = document.getElementById('signup-form');
-        const forgotPasswordForm = document.getElementById('forgot-password-form'); // New
+        const forgotPasswordForm = document.getElementById('forgot-password-form'); 
         const userInfoDiv = document.getElementById('user-info');
-        const userIdentityDisplay = document.getElementById('user-identity-display'); // Changed ID
+        const userIdentityDisplay = document.getElementById('user-identity-display'); 
         const logoutButton = document.getElementById('logout-button');
         const appContent = document.getElementById('app-content');
 
@@ -411,58 +425,35 @@
         function applyTheme(theme) {
             if (theme === 'dark') {
                 document.body.classList.add('dark-theme');
-                themeToggleButton.innerHTML = '<i class="bi bi-brightness-high-fill"></i>'; // Sun icon
+                themeToggleButton.innerHTML = '<i class="bi bi-brightness-high-fill"></i>'; 
                 localStorage.setItem('theme', 'dark');
             } else {
                 document.body.classList.remove('dark-theme');
-                themeToggleButton.innerHTML = '<i class="bi bi-moon-stars-fill"></i>'; // Moon icon
+                themeToggleButton.innerHTML = '<i class="bi bi-moon-stars-fill"></i>'; 
                 localStorage.setItem('theme', 'light');
             }
         }
 
         themeToggleButton.addEventListener('click', () => {
             const currentTheme = localStorage.getItem('theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-            if (currentTheme === 'light') {
-                applyTheme('dark');
-            } else {
-                applyTheme('light');
-            }
+            applyTheme(currentTheme === 'light' ? 'dark' : 'light');
         });
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme) {
-            applyTheme(savedTheme);
-        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            applyTheme('dark');
-        } else {
-            applyTheme('light'); 
-        }
+        
+        const savedTheme = localStorage.getItem('theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        applyTheme(savedTheme);
 
 
         // --- Authentication UI Toggling ---
-        showSignupLink.addEventListener('click', (e) => { 
-            e.preventDefault(); 
-            loginView.style.display = 'none'; 
-            signupView.style.display = 'block'; 
-            forgotPasswordView.style.display = 'none';
-        });
-        showLoginFromSignupLink.addEventListener('click', (e) => { 
-            e.preventDefault(); 
-            signupView.style.display = 'none'; 
-            loginView.style.display = 'block'; 
-            forgotPasswordView.style.display = 'none';
-        });
-        showForgotPasswordLink.addEventListener('click', (e) => {
-            e.preventDefault();
+        function switchAuthView(viewToShow) {
             loginView.style.display = 'none';
             signupView.style.display = 'none';
-            forgotPasswordView.style.display = 'block';
-        });
-        showLoginFromForgotLink.addEventListener('click', (e) => {
-            e.preventDefault();
             forgotPasswordView.style.display = 'none';
-            loginView.style.display = 'block';
-            signupView.style.display = 'none';
-        });
+            if (viewToShow) viewToShow.style.display = 'block';
+        }
+        showSignupLink.addEventListener('click', (e) => { e.preventDefault(); switchAuthView(signupView); });
+        showLoginFromSignupLink.addEventListener('click', (e) => { e.preventDefault(); switchAuthView(loginView); });
+        showForgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); switchAuthView(forgotPasswordView); });
+        showLoginFromForgotLink.addEventListener('click', (e) => { e.preventDefault(); switchAuthView(loginView); });
 
         // --- Firebase Collection Constants ---
         const USERS_COLLECTION = 'users';
@@ -471,157 +462,192 @@
 
         // --- User Profile Management ---
         async function saveUserProfile(userId, name, email) {
-            console.log(`Saving user profile for ${userId}: Name - ${name}, Email - ${email}`);
+            if (!db) { console.error("Firestore not initialized."); return; }
+            console.log(`Attempting to save user profile for ${userId}: Name - ${name}`);
             try {
                 const userDocRef = doc(db, USERS_COLLECTION, userId);
                 await setDoc(userDocRef, {
                     name: name,
-                    email: email,
+                    email: email, 
                     createdAt: serverTimestamp() 
-                }, { merge: true }); // Merge true to update if exists, or create if not
-                console.log("User profile saved successfully.");
-                currentUserName = name; // Update local name cache
+                }, { merge: true }); 
+                console.log("User profile saved successfully to Firestore.");
+                currentUserName = name; 
             } catch (error) {
-                console.error("Error saving user profile: ", error);
-                alert("Error saving user profile information.");
+                console.error("Error saving user profile to Firestore: ", error);
+                // alert("Error saving user profile information. Check console for details.");
             }
         }
 
         async function loadUserProfile(userId) {
+            if (!db) { console.error("Firestore not initialized."); return; }
             console.log(`Loading user profile for ${userId}`);
+            if (!userId || !currentUser) { // Ensure currentUser is available for email fallback
+                console.warn("loadUserProfile called with no userId or currentUser not set.");
+                if(userIdentityDisplay) userIdentityDisplay.textContent = currentUser ? currentUser.email : "Guest"; 
+                return;
+            }
             try {
                 const userDocRef = doc(db, USERS_COLLECTION, userId);
                 const userDocSnap = await getDoc(userDocRef);
                 if (userDocSnap.exists()) {
                     const userData = userDocSnap.data();
-                    currentUserName = userData.name || ""; // Store fetched name
-                    console.log("User profile loaded:", userData);
-                    userIdentityDisplay.textContent = currentUserName || currentUser.email; // Display name or fallback to email
+                    currentUserName = userData.name || ""; 
+                    console.log("User profile loaded from Firestore:", currentUserName);
+                    if(userIdentityDisplay) userIdentityDisplay.textContent = currentUserName || currentUser.email;
                 } else {
-                    console.log("No user profile document found. Displaying email.");
-                    currentUserName = ""; // No name found
-                    userIdentityDisplay.textContent = currentUser.email;
+                    console.log("No user profile document found in Firestore. Displaying email as fallback.");
+                    currentUserName = ""; 
+                    if(userIdentityDisplay) userIdentityDisplay.textContent = currentUser.email;
                 }
             } catch (error) {
-                console.error("Error loading user profile:", error);
-                userIdentityDisplay.textContent = currentUser.email; // Fallback on error
+                console.error("Error loading user profile from Firestore:", error);
+                 if(userIdentityDisplay) userIdentityDisplay.textContent = currentUser.email; 
             }
         }
 
-
         // --- Authentication Logic ---
-        signupForm.addEventListener('submit', async (e) => { 
-            e.preventDefault(); 
-            const name = document.getElementById('signup-name').value.trim();
-            const email = document.getElementById('signup-email').value; 
-            const password = document.getElementById('signup-password').value; 
-            
-            if (!name) {
-                alert("Please enter your name.");
-                return;
-            }
-            console.log("Attempting signup for:", email); 
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                console.log("Signup successful:", userCredential.user.uid, userCredential.user.email);
-                await saveUserProfile(userCredential.user.uid, name, email); // Save name to Firestore
-                signupForm.reset(); 
-                // onAuthStateChanged will handle UI update
-            } catch (error) {
-                console.error("Signup Error:", error.code, error.message, error); 
-                alert(`Signup Error: ${error.message}`); 
-            }
-        });
+        if (auth) { // Only add auth listeners if auth initialized
+            signupForm.addEventListener('submit', async (e) => { 
+                e.preventDefault(); 
+                const name = document.getElementById('signup-name').value.trim();
+                const email = document.getElementById('signup-email').value.trim(); 
+                const password = document.getElementById('signup-password').value; 
+                
+                if (!name) { alert("Please enter your name."); return; }
+                if (password.length < 6) { alert("Password must be at least 6 characters long."); return; }
 
-        loginForm.addEventListener('submit', (e) => { 
-            e.preventDefault(); 
-            const email = document.getElementById('login-email').value; 
-            const password = document.getElementById('login-password').value; 
-            console.log("Attempting login for:", email); 
-            signInWithEmailAndPassword(auth, email, password) 
-            .then(userCredential => { 
-                console.log("Login successful:", userCredential.user.uid, userCredential.user.email); 
-                loginForm.reset(); 
-                // onAuthStateChanged will handle UI update
-            }) 
-            .catch(error => { 
-                console.error("Login Error:", error.code, error.message, error); 
-                alert(`Login Error: ${error.message}`); 
-            }); 
-        });
+                console.log("Attempting signup for:", email); 
+                try {
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    console.log("Firebase Auth: Signup successful for:", userCredential.user.email);
+                    await saveUserProfile(userCredential.user.uid, name, email); 
+                    signupForm.reset(); 
+                } catch (error) {
+                    console.error("Signup Error:", error.code, error.message); 
+                    alert(`Signup Error: ${error.message}`); 
+                }
+            });
 
-        forgotPasswordForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const email = document.getElementById('forgot-email').value;
-            console.log("Attempting password reset for:", email);
-            sendPasswordResetEmail(auth, email)
-                .then(() => {
+            loginForm.addEventListener('submit', async (e) => { 
+                e.preventDefault(); 
+                const email = document.getElementById('login-email').value.trim(); 
+                const password = document.getElementById('login-password').value; 
+                console.log("Attempting login for:", email); 
+                try {
+                    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                    console.log("Login successful:", userCredential.user.email); 
+                    loginForm.reset(); 
+                } catch (error) {
+                    console.error("Login Error:", error.code, error.message); 
+                    alert(`Login Error: ${error.message}`); 
+                }
+            });
+
+            forgotPasswordForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('forgot-email').value.trim();
+                console.log("Attempting password reset for:", email);
+                try {
+                    await sendPasswordResetEmail(auth, email);
                     console.log("Password reset email sent.");
                     alert("Password reset email sent! Check your inbox (and spam folder).");
                     forgotPasswordForm.reset();
-                    // Optionally switch back to login view
-                    forgotPasswordView.style.display = 'none';
-                    loginView.style.display = 'block';
-                })
-                .catch((error) => {
+                    switchAuthView(loginView);
+                } catch (error) {
                     console.error("Password Reset Error:", error.code, error.message);
                     alert(`Password Reset Error: ${error.message}`);
-                });
-        });
+                }
+            });
 
-        logoutButton.addEventListener('click', () => { 
-            console.log("Attempting logout..."); 
-            signOut(auth).then(() => { 
-                console.log("User signed out successfully."); 
-                // onAuthStateChanged will handle UI reset
-            }).catch(error => { 
-                console.error("Sign out error:", error.code, error.message, error); 
-            }); 
-        });
+            logoutButton.addEventListener('click', async () => { 
+                console.log("Attempting logout..."); 
+                try {
+                    await signOut(auth);
+                    console.log("User signed out successfully."); 
+                } catch (error) {
+                    console.error("Sign out error:", error.code, error.message); 
+                }
+            });
 
-        onAuthStateChanged(auth, async user => { 
-            if (user) { 
-                currentUser = user; 
-                console.log("Auth state changed: User is logged in.", currentUser.uid, currentUser.email); 
-                await loadUserProfile(currentUser.uid); // Load name and update display
-                
-                authContainer.style.display = 'block'; // Keep auth container for user info/logout
-                loginView.style.display = 'none'; 
-                signupView.style.display = 'none'; 
-                forgotPasswordView.style.display = 'none';
-                userInfoDiv.style.display = 'block'; 
-                appContent.style.display = 'block'; 
-                loadDataFromFirestore(); 
-            } else { 
-                currentUser = null; 
-                currentUserName = "";
-                console.log("Auth state changed: User is logged out."); 
+            onAuthStateChanged(auth, async (user) => { 
+                if (user) { 
+                    currentUser = user; 
+                    console.log("Auth state changed: User is logged in.", currentUser.uid); 
+                    await loadUserProfile(currentUser.uid); 
+                    
+                    authContainer.style.display = 'block'; 
+                    switchAuthView(null); // Hide all auth forms initially
+                    loginView.style.display = 'none'; 
+                    signupView.style.display = 'none';
+                    forgotPasswordView.style.display = 'none';
+                    userInfoDiv.style.display = 'block'; 
+                    appContent.style.display = 'block'; 
+                    await loadDataFromFirestore(); 
+                } else { 
+                    currentUser = null; 
+                    currentUserName = "";
+                    console.log("Auth state changed: User is logged out."); 
+                    expenses = []; budget = 0; totalExpenses = 0; 
+                    
+                    authContainer.style.display = 'block'; 
+                    switchAuthView(loginView); 
+                    userInfoDiv.style.display = 'none'; 
+                    appContent.style.display = 'none'; 
+                    if(userIdentityDisplay) userIdentityDisplay.textContent = ""; 
+                    updateExpenseList(); 
+                    updateBudgetUI(); 
+                } 
+            });
+        } else {
+            console.error("Auth service not available. App functionality will be limited.");
+            // Hide parts of the UI that depend on Firebase
+            appContent.style.display = 'none';
+            authContainer.innerHTML = '<p class="text-danger text-center">Firebase is not configured correctly. App cannot run.</p>';
+        }
+
+
+        // --- Firestore Data Handling --- (Ensure db is initialized before calling these)
+        async function saveBudgetToFirestore() { if (!currentUser || !db) { console.warn("Cannot save budget, no user logged in or DB not init."); return; } console.log(`Saving budget for user ${currentUser.uid}: ${budget}`); try { const budgetDocRef = doc(db, BUDGET_COLLECTION, currentUser.uid); await setDoc(budgetDocRef, { amount: budget, lastUpdated: serverTimestamp() }); console.log("Budget saved successfully to Firestore."); } catch (error) { console.error("Error saving budget to Firestore: ", error); alert("Error saving budget."); } }
+        async function loadDataFromFirestore() { 
+            if (!currentUser || !db) { console.warn("Cannot load data, no user logged in or DB not init."); return; } 
+            console.log(`Loading budget and expenses for user ${currentUser.uid}...`);
+            try { 
+                const budgetDocRef = doc(db, BUDGET_COLLECTION, currentUser.uid); 
+                const budgetDocSnap = await getDoc(budgetDocRef); 
+                if (budgetDocSnap.exists()) { budget = budgetDocSnap.data().amount || 0; console.log("Budget loaded:", budget); } 
+                else { budget = 0; console.log("No budget document found for user. Setting budget to 0."); } 
+            } catch (error) { console.error("Error loading budget from Firestore: ", error); budget = 0; } 
+            try { 
+                const expensesQuery = query( collection(db, EXPENSES_COLLECTION), where("userId", "==", currentUser.uid), orderBy("date", "desc") ); 
+                const expensesSnapshot = await getDocs(expensesQuery); 
                 expenses = []; 
-                budget = 0; 
-                totalExpenses = 0; 
-                authContainer.style.display = 'block'; 
-                loginView.style.display = 'block'; 
-                signupView.style.display = 'none'; 
-                forgotPasswordView.style.display = 'none';
-                userInfoDiv.style.display = 'none'; 
-                appContent.style.display = 'none'; 
-                userIdentityDisplay.textContent = ""; // Clear user identity display
-                updateExpenseList(); 
-                updateBudgetUI(); 
-            } 
-        });
-
-        // --- Firestore Data Handling ---
-        async function saveBudgetToFirestore() { if (!currentUser) { console.warn("Cannot save budget, no user logged in."); return; } console.log(`Saving budget for user ${currentUser.uid}: ${budget}`); try { const budgetDocRef = doc(db, BUDGET_COLLECTION, currentUser.uid); await setDoc(budgetDocRef, { amount: budget, lastUpdated: serverTimestamp() }); console.log("Budget saved successfully to Firestore."); } catch (error) { console.error("Error saving budget to Firestore: ", error.code, error.message, error); alert("Error saving budget."); } }
-        async function loadDataFromFirestore() { if (!currentUser) { console.warn("Cannot load data, no user logged in."); return; } console.log(`Loading data for user ${currentUser.uid}...`); console.log("Loading budget..."); try { const budgetDocRef = doc(db, BUDGET_COLLECTION, currentUser.uid); const budgetDocSnap = await getDoc(budgetDocRef); if (budgetDocSnap.exists()) { budget = budgetDocSnap.data().amount || 0; console.log("Budget loaded:", budget); } else { budget = 0; console.log("No budget document found for user. Setting budget to 0."); } } catch (error) { console.error("Error loading budget from Firestore: ", error.code, error.message, error); budget = 0; } console.log("Loading expenses..."); try { const expensesQuery = query( collection(db, EXPENSES_COLLECTION), where("userId", "==", currentUser.uid), orderBy("date", "desc") ); console.log("Expense query created for userId:", currentUser.uid); const expensesSnapshot = await getDocs(expensesQuery); expenses = []; console.log(`Found ${expensesSnapshot.docs.length} expense documents.`); expensesSnapshot.forEach(docSnap => { const expenseData = docSnap.data(); console.log("Processing expense doc:", docSnap.id, expenseData); expenses.push({ id: docSnap.id, ...expenseData }); }); console.log("Local expenses array populated:", expenses); } catch (error) { console.error("Error loading expenses from Firestore: ", error.code, error.message, error); expenses = []; } updateExpenseList(); }
-        async function deleteExpenseFromFirestore(expenseId) { if (!currentUser) { console.warn("Cannot delete expense, no user logged in."); return; } console.log(`Attempting to delete expense ${expenseId} for user ${currentUser.uid}`); try { const expenseDocRef = doc(db, EXPENSES_COLLECTION, expenseId); await deleteDoc(expenseDocRef); console.log("Expense deleted successfully from Firestore:", expenseId); } catch (error) { console.error("Error deleting expense from Firestore: ", error.code, error.message, error); alert("Error deleting expense."); throw error; } }
-        async function clearAllExpensesFromFirestore() { if (!currentUser) { console.warn("Cannot clear expenses, no user logged in."); return; } console.log(`Attempting to clear all expenses for user ${currentUser.uid}`); try { const expensesQuery = query( collection(db, EXPENSES_COLLECTION), where("userId", "==", currentUser.uid) ); const expensesSnapshot = await getDocs(expensesQuery); if (expensesSnapshot.empty) { console.log("No expenses to clear for user."); return; } const batch = writeBatch(db); expensesSnapshot.forEach(docSnap => { console.log("Adding to batch delete:", docSnap.id); batch.delete(docSnap.ref); }); await batch.commit(); console.log("All expenses cleared successfully from Firestore for user:", currentUser.uid); } catch (error) { console.error("Error clearing all expenses from Firestore: ", error.code, error.message, error); alert("Error clearing all expenses."); throw error; } }
+                expensesSnapshot.forEach(docSnap => { expenses.push({ id: docSnap.id, ...docSnap.data() }); }); 
+                console.log(`Loaded ${expenses.length} expenses from Firestore.`);
+            } catch (error) { console.error("Error loading expenses from Firestore: ", error); expenses = []; } 
+            updateExpenseList(); 
+        }
+        async function deleteExpenseFromFirestore(expenseId) { if (!currentUser || !db) { console.warn("Cannot delete, no user or DB not init."); return; } console.log(`Attempting to delete expense ${expenseId}`); try { const expenseDocRef = doc(db, EXPENSES_COLLECTION, expenseId); await deleteDoc(expenseDocRef); console.log("Expense deleted successfully from Firestore:", expenseId); } catch (error) { console.error("Error deleting expense from Firestore: ", error); alert("Error deleting expense."); throw error; } }
+        async function clearAllExpensesFromFirestore() { if (!currentUser || !db) { console.warn("Cannot clear, no user or DB not init."); return; } console.log(`Attempting to clear all expenses for user ${currentUser.uid}`); try { const expensesQuery = query( collection(db, EXPENSES_COLLECTION), where("userId", "==", currentUser.uid) ); const expensesSnapshot = await getDocs(expensesQuery); if (expensesSnapshot.empty) { console.log("No expenses to clear for user."); return; } const batch = writeBatch(db); expensesSnapshot.forEach(docSnap => { batch.delete(docSnap.ref); }); await batch.commit(); console.log("All expenses cleared successfully from Firestore for user:", currentUser.uid); } catch (error) { console.error("Error clearing all expenses from Firestore: ", error); alert("Error clearing all expenses."); throw error; } }
 
         // --- Event Listeners & UI Update Functions ---
-        budgetForm.addEventListener('submit', async function(event) { event.preventDefault(); if (!currentUser) { alert("Please log in to set a budget."); return; } const newBudget = parseFloat(monthlyBudgetInput.value); if (isNaN(newBudget) || newBudget < 0) { alert("Please enter a valid budget amount."); return; } budget = newBudget; monthlyBudgetInput.value = ''; await saveBudgetToFirestore(); updateBudgetUI(); });
-        expenseForm.addEventListener('submit', async function(event) { event.preventDefault(); if (!currentUser) { alert("Please log in to add expenses."); return; } const name = expenseNameInput.value.trim(); const amount = parseFloat(expenseAmountInput.value); const category = expenseCategoryInput.value; const date = expenseDateInput.value; if (!name || isNaN(amount) || amount <= 0 || !category || !date) { alert("Please fill in all fields with valid data."); return; } const newExpenseData = { name, amount, category, date, userId: currentUser.uid, createdAt: serverTimestamp() }; console.log("Attempting to add new expense:", newExpenseData); try { const docRef = await addDoc(collection(db, EXPENSES_COLLECTION), newExpenseData); console.log("Expense added successfully to Firestore with ID:", docRef.id); expenses.push({ id: docRef.id, ...newExpenseData, date: new Date(date), createdAt: new Date() }); // Ensure date is a Date object for sorting if needed, or rely on Firestore's string date for ordering
-            expenses.sort((a, b) => new Date(b.date) - new Date(a.date)); // Re-sort after adding new
-            updateExpenseList(); expenseForm.reset(); } catch (error) { console.error("Error adding expense to Firestore: ", error.code, error.message, error); alert("Failed to add expense. Please try again. Check console for details."); } });
+        budgetForm.addEventListener('submit', async function(event) { event.preventDefault(); if (!currentUser || !db) { alert("Please log in to set a budget. Firebase not available."); return; } const newBudget = parseFloat(monthlyBudgetInput.value); if (isNaN(newBudget) || newBudget < 0) { alert("Please enter a valid budget amount."); return; } budget = newBudget; monthlyBudgetInput.value = ''; await saveBudgetToFirestore(); updateBudgetUI(); });
+        expenseForm.addEventListener('submit', async function(event) { 
+            event.preventDefault(); 
+            if (!currentUser || !db) { alert("Please log in to add expenses. Firebase not available."); return; } 
+            const name = expenseNameInput.value.trim(); 
+            const amount = parseFloat(expenseAmountInput.value); 
+            const category = expenseCategoryInput.value; 
+            const dateStr = expenseDateInput.value; 
+            if (!name || isNaN(amount) || amount <= 0 || !category || !dateStr) { alert("Please fill in all fields with valid data."); return; } 
+            const newExpenseData = { name, amount, category, date: dateStr, userId: currentUser.uid, createdAt: serverTimestamp() }; 
+            try { 
+                const docRef = await addDoc(collection(db, EXPENSES_COLLECTION), newExpenseData); 
+                expenses.push({ id: docRef.id, ...newExpenseData, createdAt: new Date() }); 
+                updateExpenseList(); 
+                expenseForm.reset(); 
+            } catch (error) { console.error("Error adding expense to Firestore: ", error); alert("Failed to add expense."); } 
+        });
         
         function updateBudgetUI() { 
             totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
@@ -629,25 +655,23 @@
             currentBudgetDisplayEl.innerText = `₹${budget.toFixed(2)}`;
             spentBudgetDisplayEl.innerText = `₹${totalExpenses.toFixed(2)}`;
             remainingBudgetEl.innerText = `₹${remaining.toFixed(2)}`;
-            let spentPercentage = budget > 0 ? ((totalExpenses / budget) * 100) : 0;
-            spentPercentage = Math.max(0, Math.min(100, spentPercentage)); 
+            let spentPercentage = budget > 0 ? Math.min(100, (totalExpenses / budget) * 100) : 0;
+            spentPercentage = Math.max(0, spentPercentage); 
             percentageSpentEl.innerText = `${spentPercentage.toFixed(1)}%`;
             remainingBudgetEl.style.color = remaining < 0 ? 'var(--danger-color)' : 'var(--success-color)';
             budgetProgressBar.style.width = `${spentPercentage}%`;
             budgetProgressBar.innerText = `${spentPercentage.toFixed(0)}%`;
             budgetProgressBar.setAttribute('aria-valuenow', spentPercentage);
-            budgetProgressBar.style.backgroundColor = (totalExpenses > budget && budget > 0) ? 'var(--danger-color)' : 'var(--secondary-color)';
+            budgetProgressBar.style.backgroundColor = (spentPercentage >= 100 && budget > 0) ? 'var(--danger-color)' : 'var(--secondary-color)';
             totalExpensesDisplayEl.innerText = `₹${totalExpenses.toFixed(2)}`;
         }
 
         function updateExpenseList() {
             expenseListEl.innerHTML = "";
-            // Ensure expenses are sorted by date (descending) before rendering
-            // This is important if new expenses are pushed without re-fetching or if date format varies
-             expenses.sort((a, b) => {
-                const dateA = a.date instanceof Timestamp ? a.date.toDate() : new Date(a.date);
-                const dateB = b.date instanceof Timestamp ? b.date.toDate() : new Date(b.date);
-                return dateB - dateA;
+            expenses.sort((a, b) => { 
+                const dateA = (a.date instanceof Timestamp) ? a.date.toDate().toISOString().split('T')[0] : a.date;
+                const dateB = (b.date instanceof Timestamp) ? b.date.toDate().toISOString().split('T')[0] : b.date;
+                if (dateA < dateB) return 1; if (dateA > dateB) return -1; return 0;
             });
 
             if (expenses.length === 0) {
@@ -655,17 +679,12 @@
             } else {
                 expenses.forEach(expense => {
                     let displayDate;
-                    // Handle date from Firestore (Timestamp or string) vs newly added (string or Date)
                     if (expense.date instanceof Timestamp) {
-                        displayDate = expense.date.toDate().toLocaleDateString('en-GB');
-                    } else if (typeof expense.date === 'string' && expense.date.includes('-')) { 
-                        displayDate = new Date(expense.date).toLocaleDateString('en-GB');
-                    } else if (expense.date instanceof Date) {
-                         displayDate = expense.date.toLocaleDateString('en-GB');
-                    }
-                     else {
-                        displayDate = 'Invalid Date'; 
-                    }
+                        displayDate = expense.date.toDate().toLocaleDateString('en-GB'); 
+                    } else if (typeof expense.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(expense.date)) { 
+                        const parts = expense.date.split('-');
+                        displayDate = `${parts[2]}/${parts[1]}/${parts[0]}`; 
+                    } else { displayDate = 'Invalid Date'; }
                     
                     let row = `<tr>
                         <td>${displayDate}</td>
@@ -685,44 +704,30 @@
         }
         
         window.deleteExpense = async function(id) { 
-            if (!currentUser) return;
-            console.log("window.deleteExpense called for ID:", id);
+            if (!currentUser || !id || !db) return;
             const originalExpenses = [...expenses];
             expenses = expenses.filter(expense => expense.id !== id);
             updateExpenseList(); 
-            try {
-                await deleteExpenseFromFirestore(id);
-            } catch (error) {
-                console.error("Rollback UI due to delete error for expense ID:", id, error);
-                expenses = originalExpenses; 
-                updateExpenseList();
-            }
+            try { await deleteExpenseFromFirestore(id); } 
+            catch (error) { expenses = originalExpenses; updateExpenseList(); }
         }
         window.clearAllExpenses = async function() { 
-            if (!currentUser) return;
-            console.log("window.clearAllExpenses called");
+            if (!currentUser || !db) return;
             if (confirm("Are you sure you want to clear all expenses? This action cannot be undone.")) {
-                const originalExpenses = [...expenses];
-                expenses = [];
-                updateExpenseList(); 
-                try {
-                    await clearAllExpensesFromFirestore();
-                } catch (error) {
-                    console.error("Rollback UI due to clear all error:", error);
-                    expenses = originalExpenses; 
-                    updateExpenseList();
-                }
+                const originalExpenses = [...expenses]; expenses = []; updateExpenseList(); 
+                try { await clearAllExpensesFromFirestore(); } 
+                catch (error) { expenses = originalExpenses; updateExpenseList(); }
             }
         }
         function escapeHTML(str) { 
-            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
             if (typeof str !== 'string') return ''; 
-            return str.replace(/[&<>"']/g, function (m) { return map[m]; });
+            return str.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
         }
 
         window.printExpenses = function() { 
             console.log("window.printExpenses called");
             const printWindow = window.open("", "_blank", "width=1000,height=700");
+            if (!printWindow) { alert("Please allow popups to print expenses."); return; }
             const printCurrentDate = new Date().toLocaleString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
             const remainingBalance = budget - totalExpenses;
             let printContent = `
@@ -740,22 +745,26 @@
                     .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #777; }
                     .total-row td { font-weight: bold; background-color: #e9ecef; } .amount-col { text-align: right; }
                 </style>
-                </head><body><h1>Expense Report</h1><div class="meta-info">Generated on: ${printCurrentDate}</div>
+                </head><body><h1>Expense Report</h1><div class="meta-info">Generated by: ${escapeHTML(currentUserName) || (currentUser ? currentUser.email : 'N/A')} on ${printCurrentDate}</div>
                 <h2>Expense Details</h2><table><thead><tr>
                 <th>Date</th><th>Expense Name</th><th>Category</th><th class="amount-col">Amount</th>
                 </tr></thead><tbody>`;
-            if (expenses.length > 0) {
-                expenses.forEach(expense => {
+            
+            const sortedExpensesForPrint = [...expenses].sort((a, b) => {
+                const dateA = (a.date instanceof Timestamp) ? a.date.toDate().toISOString().split('T')[0] : a.date;
+                const dateB = (b.date instanceof Timestamp) ? b.date.toDate().toISOString().split('T')[0] : b.date;
+                if (dateA < dateB) return 1; if (dateA > dateB) return -1; return 0;
+            });
+
+            if (sortedExpensesForPrint.length > 0) {
+                sortedExpensesForPrint.forEach(expense => {
                     let displayDate;
                     if (expense.date instanceof Timestamp) { 
                         displayDate = expense.date.toDate().toLocaleDateString('en-GB');
-                    } else if (typeof expense.date === 'string' && expense.date.includes('-')) { 
-                        displayDate = new Date(expense.date).toLocaleDateString('en-GB');
-                    } else if (expense.date instanceof Date) {
-                         displayDate = expense.date.toLocaleDateString('en-GB');
-                    } else {
-                        displayDate = 'Invalid Date';
-                    }
+                    } else if (typeof expense.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(expense.date)) { 
+                        const parts = expense.date.split('-');
+                        displayDate = `${parts[2]}/${parts[1]}/${parts[0]}`; 
+                    } else { displayDate = 'Invalid Date'; }
                     printContent += `<tr>
                         <td>${displayDate}</td>
                         <td>${escapeHTML(expense.name)}</td>
@@ -780,8 +789,9 @@
         }
 
         // Initialize UI elements
-        currentDateEl.innerText = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-        console.log("Script fully loaded. Waiting for auth state changes...");
+        if (currentDateEl) currentDateEl.innerText = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+        switchAuthView(loginView); // Start by showing the login view
+        console.log("Script fully loaded. Waiting for auth state changes if Firebase initialized.");
     </script>
 </body>
 </html>
