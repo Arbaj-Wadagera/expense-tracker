@@ -8,16 +8,46 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <style>
         :root {
+            /* Light Theme (Default) */
             --primary-color: #2c3e50;
             --secondary-color: #3498db;
             --success-color: #27ae60;
             --danger-color: #e74c3c;
             --light-bg: #f8f9fa;
+            --text-color: #212529; /* Default text color for light theme */
+            --card-bg: white;
+            --table-header-bg: #2c3e50;
+            --table-header-text: white;
+            --input-group-text-bg: #3498db;
+            --input-group-text-color: white;
+            --even-row-bg: #f9f9f9;
+            --hover-row-bg: #e9ecef;
+            --border-color: #dee2e6; /* A general border color */
+        }
+
+        .dark-theme {
+            /* Dark Theme Overrides */
+            --primary-color: #ecf0f1;    /* Light text on dark background */
+            --secondary-color: #3498db;   /* Keep action color vibrant */
+            --success-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --light-bg: #20232A;        /* Dark background for body */
+            --text-color: #ecf0f1;       /* Light text on dark background */
+            --card-bg: #2c3038;        /* Darker card background */
+            --table-header-bg: #34495e;
+            --table-header-text: #ecf0f1;
+            --input-group-text-bg: #3498db;
+            --input-group-text-color: white; /* Keep this for contrast or adjust if needed */
+            --even-row-bg: #31353d;
+            --hover-row-bg: #3a3f47;
+            --border-color: #4A4E57;
         }
 
         body {
             background-color: var(--light-bg);
-            color: var(--primary-color);
+            color: var(--text-color); /* Changed from --primary-color to --text-color for better theming */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease; /* Smooth theme transition */
         }
 
         .container-main {
@@ -26,175 +56,732 @@
             padding: 20px;
         }
 
+        .header-text-color { /* Specific class for header text for theming */
+             color: var(--primary-color);
+        }
+
         .dashboard-card {
-            background: white;
+            background: var(--card-bg);
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
             padding: 1.5rem;
             margin-bottom: 1.5rem;
-            transition: transform 0.2s ease;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease;
+            border: 1px solid var(--border-color); /* Add border for better definition in dark mode */
         }
-
         .dashboard-card:hover {
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
         }
-
-        .btn-primary {
+        .btn-primary { /* Bootstrap primary button */
             background-color: var(--secondary-color);
+            border-color: var(--secondary-color); /* Match border */
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+        .btn-primary:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+        }
+        .btn-secondary { /* Custom print button */
+            background-color: var(--primary-color); /* This will change with theme */
             border: none;
+            color: var(--light-bg); /* Text color that contrasts with button's primary */
+            transition: background-color 0.2s ease;
+        }
+         .dark-theme .btn-secondary { 
+            color: var(--card-bg); 
+        }
+        .btn-secondary:hover {
+            background-color: #1f2c39; 
+        }
+        .dark-theme .btn-secondary:hover {
+             background-color: #566573; 
         }
 
         .stats-box {
             text-align: center;
             padding: 1.5rem;
-            background: white;
             border-radius: 12px;
             margin: 1rem 0;
+        }
+        .table th {
+            background-color: var(--table-header-bg);
+            color: var(--table-header-text);
+            border-color: var(--border-color);
+        }
+        .table td {
+            vertical-align: middle;
+            color: var(--text-color); 
+            border-color: var(--border-color);
+        }
+         .table { 
+            border: 1px solid var(--border-color);
+        }
+        .input-group-text {
+            background-color: var(--input-group-text-bg);
+            color: var(--input-group-text-color);
+            border-color: var(--input-group-text-bg);
+        }
+        #expense-list tr:nth-child(even) {
+            background-color: var(--even-row-bg);
+        }
+        #expense-list tr:hover {
+            background-color: var(--hover-row-bg);
+        }
+        .form-control, .form-select {
+            background-color: var(--card-bg); 
+            color: var(--text-color);       
+            border: 1px solid var(--border-color);
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border-color: var(--secondary-color); 
+            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25); /* Using actual RGB for secondary-color */
+        }
+         .dark-theme .form-control:focus, .dark-theme .form-select:focus {
+             box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25); /* Ensure secondary color is used for focus in dark theme */
+         }
+
+        .form-label {
+            color: var(--text-color);
+        }
+        .text-muted {
+            color: var(--text-color) !important; 
+            opacity: 0.65;
+        }
+        #theme-toggle-button {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1000;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
         }
     </style>
 </head>
 <body>
+    <button id="theme-toggle-button" class="btn btn-sm">
+        <i class="bi bi-moon-stars-fill"></i> </button>
+
     <div class="container-main">
-        <header class="text-center mb-5">
-            <h1 class="display-4 mb-3 fw-bold" style="color: var(--primary-color);">
-                <i class="bi bi-pie-chart-fill me-2"></i>Expense Manager
-            </h1>
-            <p id="current-date" class="text-muted"></p>
-        </header>
+        <div id="auth-container" class="mb-4 dashboard-card">
+            <div id="login-view">
+                <h4 class="mb-3 header-text-color"><i class="bi bi-box-arrow-in-right me-2"></i>Login</h4>
+                <form id="login-form">
+                    <div class="mb-3">
+                        <label for="login-email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="login-email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="login-password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="login-password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Login</button>
+                    <p class="mt-3 text-center">
+                        Don't have an account? <a href="#" id="show-signup" style="color: var(--secondary-color);">Sign Up</a><br>
+                        <a href="#" id="show-forgot-password" style="color: var(--secondary-color); font-size: 0.9em;">Forgot Password?</a>
+                    </p>
+                </form>
+            </div>
 
-        <div class="row">
-            <div class="col-lg-4 mb-4">
-                <div class="dashboard-card">
-                    <h4 class="mb-4"><i class="bi bi-plus-circle me-2"></i>New Expense</h4>
-                    <form id="expense-form">
-                        <div class="mb-3">
-                            <label class="form-label">Expense Name</label>
-                            <input type="text" class="form-control" id="expense-name" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Amount</label>
-                            <div class="input-group">
-                                <span class="input-group-text">₹</span>
-                                <input type="number" class="form-control" id="expense-amount" step="0.01" required>
+            <div id="signup-view" style="display: none;">
+                <h4 class="mb-3 header-text-color"><i class="bi bi-person-plus-fill me-2"></i>Sign Up</h4>
+                <form id="signup-form">
+                    <div class="mb-3">
+                        <label for="signup-name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="signup-name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="signup-email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="signup-email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="signup-password" class="form-label">Password (min. 6 characters)</label>
+                        <input type="password" class="form-control" id="signup-password" minlength="6" required>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Sign Up</button>
+                    <p class="mt-3 text-center">Already have an account? <a href="#" id="show-login-from-signup" style="color: var(--secondary-color);">Login</a></p>
+                </form>
+            </div>
+
+            <div id="forgot-password-view" style="display: none;">
+                <h4 class="mb-3 header-text-color"><i class="bi bi-key-fill me-2"></i>Reset Password</h4>
+                <form id="forgot-password-form">
+                    <div class="mb-3">
+                        <label for="forgot-email" class="form-label">Enter your registered Email</label>
+                        <input type="email" class="form-control" id="forgot-email" required>
+                    </div>
+                    <button type="submit" class="btn btn-warning w-100">Send Reset Link</button>
+                     <p class="mt-3 text-center">Remembered your password? <a href="#" id="show-login-from-forgot" style="color: var(--secondary-color);">Login</a></p>
+                </form>
+            </div>
+
+            <div id="user-info" class="mt-3" style="display: none;">
+                <p>Logged in as: <strong id="user-identity-display"></strong></p>
+                <button id="logout-button" class="btn btn-danger btn-sm">Logout</button>
+            </div>
+        </div>
+
+        <div id="app-content" style="display: none;">
+            <header class="text-center mb-5">
+                <h1 class="display-4 mb-3 fw-bold header-text-color">
+                    <i class="bi bi-pie-chart-fill me-2"></i>Expense Manager
+                </h1>
+                <p id="current-date" class="text-muted"></p>
+            </header>
+
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <div class="dashboard-card">
+                        <h4 class="mb-4 header-text-color"><i class="bi bi-plus-circle me-2" style="color: var(--secondary-color);"></i>New Expense</h4>
+                        <form id="expense-form">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Expense Name</label>
+                                <input type="text" class="form-control" id="expense-name" placeholder="e.g., Monthly Groceries" required>
                             </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Amount</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="number" class="form-control" id="expense-amount" step="0.01" placeholder="0.00" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Category</label>
+                                <select class="form-select" id="expense-category" required>
+                                    <option value="">Select Category</option>
+                                    <option value="Rent/Mortgage">Rent/Mortgage</option>
+                                    <option value="Groceries">Groceries</option>
+                                    <option value="Bills (Electricity, Water, Gas, Internet, Mobile)">Bills (Electricity, Water, Gas, Internet, Mobile)</option>
+                                    <option value="Fuel">Fuel</option>
+                                    <option value="Public Transport">Public Transport</option>
+                                    <option value="Vehicle Maintenance">Vehicle Maintenance</option>
+                                    <option value="Medical & Healthcare">Medical & Healthcare</option>
+                                    <option value="Insurance (Health, Vehicle, Life)">Insurance (Health, Vehicle, Life)</option>
+                                    <option value="Loan EMI">Loan EMI</option>
+                                    <option value="EMI Payment">EMI Payment</option>
+                                    <option value="Savings & Investments">Savings & Investments</option>
+                                    <option value="Food & Dining">Food & Dining</option>
+                                    <option value="Personal Care">Personal Care</option>
+                                    <option value="Education">Education</option>
+                                    <option value="Shopping (Clothes, Essentials)">Shopping (Clothes, Essentials)</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Date</label>
+                                <input type="date" class="form-control" id="expense-date" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 py-2">
+                                <i class="bi bi-save me-2"></i>Add Expense
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-lg-8">
+                    <div class="dashboard-card">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="header-text-color"><i class="bi bi-card-list me-2" style="color: var(--secondary-color);"></i>Monthly Summary</h4>
+                            <button class="btn btn-sm btn-outline-danger" onclick="window.clearAllExpenses()">
+                                <i class="bi bi-trash3 me-1"></i> Clear All
+                            </button>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Category</label>
-                            <select class="form-select" id="expense-category" required>
-                                <option value="">Select Category</option>
-                                <option value="food">Food & Dining</option>
-                                <option value="transportation">Transportation</option>
-                                <option value="housing">Housing</option>
-                                <option value="utilities">Utilities</option>
-                                <option value="entertainment">Entertainment</option>
-                                <option value="investments">Investments</option>
-                                <option value="other">Other</option>
-                            </select>
+                        <div class="table-responsive">
+                            <table class="table table-hover mt-3">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Name</th>
+                                        <th>Category</th>
+                                        <th class="text-end">Amount</th>
+                                        <th class="text-center">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="expense-list">
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Date</label>
-                            <input type="date" class="form-control" id="expense-date" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-save me-2"></i>Add Expense
+                        <p class="text-end mt-3 fw-bold">Total: <span id="total-expenses-display">₹0.00</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-box dashboard-card">
+                <h3 class="header-text-color"><i class="bi bi-cash-coin me-2" style="color: var(--success-color);"></i>Monthly Budget</h3>
+                <form id="budget-form" class="mb-3 mt-3 d-flex justify-content-center">
+                    <div class="input-group w-auto">
+                        <span class="input-group-text">₹</span>
+                        <input type="number" class="form-control" id="monthly-budget" placeholder="Set Budget" style="max-width: 150px;" required>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-check-circle me-1"></i>Set
                         </button>
-                    </form>
+                    </div>
+                </form>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <p class="mb-1 fs-5">Budget: <span id="current-budget-display" class="fw-bold">₹0.00</span></p>
+                        <p class="mb-1 fs-5">Spent: <span id="spent-budget-display" class="fw-bold">₹0.00</span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p class="mb-1 fs-5">Remaining: <span id="remaining-budget" class="fw-bold" style="color: var(--success-color);">₹0.00</span></p>
+                        <p class="text-muted small">Percentage Spent: <span id="percentage-spent">0%</span></p>
+                    </div>
+                </div>
+                <div class="progress mt-2" style="height: 20px;">
+                    <div id="budget-progress-bar" class="progress-bar" role="progressbar" style="width: 0%; background-color: var(--secondary-color);" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
             </div>
-
-            <div class="col-lg-8">
-                <div class="dashboard-card">
-                    <h4>Monthly Summary</h4>
-                    <table class="table table-bordered mt-3">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Name</th>
-                                <th>Category</th>
-                                <th>Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody id="expense-list"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <div class="stats-box">
-            <h3>Monthly Budget</h3>
-            <form id="budget-form" class="mb-3">
-                <div class="input-group">
-                    <span class="input-group-text">₹</span>
-                    <input type="number" class="form-control" id="monthly-budget" required>
-                    <button type="submit" class="btn btn-primary">Set</button>
-                </div>
-            </form>
-            <p class="mb-1">Remaining: <span id="remaining-budget" class="fw-bold">₹0.00</span></p>
-            <p class="text-muted small">Spent: <span id="percentage-spent">0%</span></p>
-        </div>
-        
-        <button class="btn btn-secondary mt-3" onclick="printExpenses()">
-            <i class="bi bi-printer me-2"></i>Print Expenses
-        </button>
+            
+            <button class="btn btn-secondary mt-3" onclick="window.printExpenses()">
+                <i class="bi bi-printer me-2"></i>Print Expenses
+            </button>
+        </div> 
     </div>
 
-    <script>
+    <script type="module">
+        // Import necessary Firebase functions
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"; // Added sendPasswordResetEmail
+        import { getFirestore, collection, doc, setDoc, addDoc, getDoc, getDocs, query, where, orderBy, deleteDoc, writeBatch, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDhZ98wMP9aLgiaFei_8BLQDhK71pJfTWA", // Replace with your actual API key if different
+            authDomain: "funds-tracking.firebaseapp.com",
+            projectId: "funds-tracking",
+            storageBucket: "funds-tracking.appspot.com", 
+            messagingSenderId: "256830715551",
+            appId: "1:256830715551:web:fc3578819c9eb5851b54aa",
+            measurementId: "G-Y0XBHVFY98"
+        };
+
+        // Initialize Firebase
+        console.log("Initializing Firebase app...");
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        console.log("Firebase app initialized.");
+
+        let currentUser = null;
+        let currentUserName = ""; // To store user's name
+        let expenses = [];
         let budget = 0;
         let totalExpenses = 0;
-        let expenses = [];
 
-        document.getElementById('current-date').innerText = new Date().toLocaleDateString();
+        // DOM Elements
+        const currentDateEl = document.getElementById('current-date');
+        const budgetForm = document.getElementById('budget-form');
+        const monthlyBudgetInput = document.getElementById('monthly-budget');
+        const expenseForm = document.getElementById('expense-form');
+        const expenseNameInput = document.getElementById('expense-name');
+        const expenseAmountInput = document.getElementById('expense-amount');
+        const expenseCategoryInput = document.getElementById('expense-category');
+        const expenseDateInput = document.getElementById('expense-date');
+        const remainingBudgetEl = document.getElementById('remaining-budget');
+        const percentageSpentEl = document.getElementById('percentage-spent');
+        const expenseListEl = document.getElementById('expense-list');
+        const currentBudgetDisplayEl = document.getElementById('current-budget-display');
+        const spentBudgetDisplayEl = document.getElementById('spent-budget-display');
+        const totalExpensesDisplayEl = document.getElementById('total-expenses-display');
+        const budgetProgressBar = document.getElementById('budget-progress-bar');
+        const themeToggleButton = document.getElementById('theme-toggle-button'); 
 
-        document.getElementById('budget-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            budget = parseFloat(document.getElementById('monthly-budget').value);
-            updateBudgetUI();
+        // Auth DOM elements
+        const authContainer = document.getElementById('auth-container');
+        const loginView = document.getElementById('login-view');
+        const signupView = document.getElementById('signup-view');
+        const forgotPasswordView = document.getElementById('forgot-password-view'); // New
+        const showSignupLink = document.getElementById('show-signup');
+        const showLoginFromSignupLink = document.getElementById('show-login-from-signup'); // Changed ID
+        const showLoginFromForgotLink = document.getElementById('show-login-from-forgot'); // New
+        const showForgotPasswordLink = document.getElementById('show-forgot-password'); // New
+        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
+        const forgotPasswordForm = document.getElementById('forgot-password-form'); // New
+        const userInfoDiv = document.getElementById('user-info');
+        const userIdentityDisplay = document.getElementById('user-identity-display'); // Changed ID
+        const logoutButton = document.getElementById('logout-button');
+        const appContent = document.getElementById('app-content');
+
+
+        // --- Theme Toggle Logic ---
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.body.classList.add('dark-theme');
+                themeToggleButton.innerHTML = '<i class="bi bi-brightness-high-fill"></i>'; // Sun icon
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-theme');
+                themeToggleButton.innerHTML = '<i class="bi bi-moon-stars-fill"></i>'; // Moon icon
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        themeToggleButton.addEventListener('click', () => {
+            const currentTheme = localStorage.getItem('theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            if (currentTheme === 'light') {
+                applyTheme('dark');
+            } else {
+                applyTheme('light');
+            }
+        });
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            applyTheme(savedTheme);
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            applyTheme('dark');
+        } else {
+            applyTheme('light'); 
+        }
+
+
+        // --- Authentication UI Toggling ---
+        showSignupLink.addEventListener('click', (e) => { 
+            e.preventDefault(); 
+            loginView.style.display = 'none'; 
+            signupView.style.display = 'block'; 
+            forgotPasswordView.style.display = 'none';
+        });
+        showLoginFromSignupLink.addEventListener('click', (e) => { 
+            e.preventDefault(); 
+            signupView.style.display = 'none'; 
+            loginView.style.display = 'block'; 
+            forgotPasswordView.style.display = 'none';
+        });
+        showForgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginView.style.display = 'none';
+            signupView.style.display = 'none';
+            forgotPasswordView.style.display = 'block';
+        });
+        showLoginFromForgotLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            forgotPasswordView.style.display = 'none';
+            loginView.style.display = 'block';
+            signupView.style.display = 'none';
         });
 
-        document.getElementById('expense-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const name = document.getElementById('expense-name').value;
-            const amount = parseFloat(document.getElementById('expense-amount').value);
-            const category = document.getElementById('expense-category').value;
-            const date = document.getElementById('expense-date').value;
+        // --- Firebase Collection Constants ---
+        const USERS_COLLECTION = 'users';
+        const BUDGET_COLLECTION = 'budgets'; 
+        const EXPENSES_COLLECTION = 'expenses';
+
+        // --- User Profile Management ---
+        async function saveUserProfile(userId, name, email) {
+            console.log(`Saving user profile for ${userId}: Name - ${name}, Email - ${email}`);
+            try {
+                const userDocRef = doc(db, USERS_COLLECTION, userId);
+                await setDoc(userDocRef, {
+                    name: name,
+                    email: email,
+                    createdAt: serverTimestamp() 
+                }, { merge: true }); // Merge true to update if exists, or create if not
+                console.log("User profile saved successfully.");
+                currentUserName = name; // Update local name cache
+            } catch (error) {
+                console.error("Error saving user profile: ", error);
+                alert("Error saving user profile information.");
+            }
+        }
+
+        async function loadUserProfile(userId) {
+            console.log(`Loading user profile for ${userId}`);
+            try {
+                const userDocRef = doc(db, USERS_COLLECTION, userId);
+                const userDocSnap = await getDoc(userDocRef);
+                if (userDocSnap.exists()) {
+                    const userData = userDocSnap.data();
+                    currentUserName = userData.name || ""; // Store fetched name
+                    console.log("User profile loaded:", userData);
+                    userIdentityDisplay.textContent = currentUserName || currentUser.email; // Display name or fallback to email
+                } else {
+                    console.log("No user profile document found. Displaying email.");
+                    currentUserName = ""; // No name found
+                    userIdentityDisplay.textContent = currentUser.email;
+                }
+            } catch (error) {
+                console.error("Error loading user profile:", error);
+                userIdentityDisplay.textContent = currentUser.email; // Fallback on error
+            }
+        }
+
+
+        // --- Authentication Logic ---
+        signupForm.addEventListener('submit', async (e) => { 
+            e.preventDefault(); 
+            const name = document.getElementById('signup-name').value.trim();
+            const email = document.getElementById('signup-email').value; 
+            const password = document.getElementById('signup-password').value; 
             
-            expenses.push({ name, amount, category, date });
-            totalExpenses += amount;
-            updateBudgetUI();
-            updateExpenseList();
-            document.getElementById('expense-form').reset();
+            if (!name) {
+                alert("Please enter your name.");
+                return;
+            }
+            console.log("Attempting signup for:", email); 
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                console.log("Signup successful:", userCredential.user.uid, userCredential.user.email);
+                await saveUserProfile(userCredential.user.uid, name, email); // Save name to Firestore
+                signupForm.reset(); 
+                // onAuthStateChanged will handle UI update
+            } catch (error) {
+                console.error("Signup Error:", error.code, error.message, error); 
+                alert(`Signup Error: ${error.message}`); 
+            }
         });
 
-        function updateBudgetUI() {
+        loginForm.addEventListener('submit', (e) => { 
+            e.preventDefault(); 
+            const email = document.getElementById('login-email').value; 
+            const password = document.getElementById('login-password').value; 
+            console.log("Attempting login for:", email); 
+            signInWithEmailAndPassword(auth, email, password) 
+            .then(userCredential => { 
+                console.log("Login successful:", userCredential.user.uid, userCredential.user.email); 
+                loginForm.reset(); 
+                // onAuthStateChanged will handle UI update
+            }) 
+            .catch(error => { 
+                console.error("Login Error:", error.code, error.message, error); 
+                alert(`Login Error: ${error.message}`); 
+            }); 
+        });
+
+        forgotPasswordForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('forgot-email').value;
+            console.log("Attempting password reset for:", email);
+            sendPasswordResetEmail(auth, email)
+                .then(() => {
+                    console.log("Password reset email sent.");
+                    alert("Password reset email sent! Check your inbox (and spam folder).");
+                    forgotPasswordForm.reset();
+                    // Optionally switch back to login view
+                    forgotPasswordView.style.display = 'none';
+                    loginView.style.display = 'block';
+                })
+                .catch((error) => {
+                    console.error("Password Reset Error:", error.code, error.message);
+                    alert(`Password Reset Error: ${error.message}`);
+                });
+        });
+
+        logoutButton.addEventListener('click', () => { 
+            console.log("Attempting logout..."); 
+            signOut(auth).then(() => { 
+                console.log("User signed out successfully."); 
+                // onAuthStateChanged will handle UI reset
+            }).catch(error => { 
+                console.error("Sign out error:", error.code, error.message, error); 
+            }); 
+        });
+
+        onAuthStateChanged(auth, async user => { 
+            if (user) { 
+                currentUser = user; 
+                console.log("Auth state changed: User is logged in.", currentUser.uid, currentUser.email); 
+                await loadUserProfile(currentUser.uid); // Load name and update display
+                
+                authContainer.style.display = 'block'; // Keep auth container for user info/logout
+                loginView.style.display = 'none'; 
+                signupView.style.display = 'none'; 
+                forgotPasswordView.style.display = 'none';
+                userInfoDiv.style.display = 'block'; 
+                appContent.style.display = 'block'; 
+                loadDataFromFirestore(); 
+            } else { 
+                currentUser = null; 
+                currentUserName = "";
+                console.log("Auth state changed: User is logged out."); 
+                expenses = []; 
+                budget = 0; 
+                totalExpenses = 0; 
+                authContainer.style.display = 'block'; 
+                loginView.style.display = 'block'; 
+                signupView.style.display = 'none'; 
+                forgotPasswordView.style.display = 'none';
+                userInfoDiv.style.display = 'none'; 
+                appContent.style.display = 'none'; 
+                userIdentityDisplay.textContent = ""; // Clear user identity display
+                updateExpenseList(); 
+                updateBudgetUI(); 
+            } 
+        });
+
+        // --- Firestore Data Handling ---
+        async function saveBudgetToFirestore() { if (!currentUser) { console.warn("Cannot save budget, no user logged in."); return; } console.log(`Saving budget for user ${currentUser.uid}: ${budget}`); try { const budgetDocRef = doc(db, BUDGET_COLLECTION, currentUser.uid); await setDoc(budgetDocRef, { amount: budget, lastUpdated: serverTimestamp() }); console.log("Budget saved successfully to Firestore."); } catch (error) { console.error("Error saving budget to Firestore: ", error.code, error.message, error); alert("Error saving budget."); } }
+        async function loadDataFromFirestore() { if (!currentUser) { console.warn("Cannot load data, no user logged in."); return; } console.log(`Loading data for user ${currentUser.uid}...`); console.log("Loading budget..."); try { const budgetDocRef = doc(db, BUDGET_COLLECTION, currentUser.uid); const budgetDocSnap = await getDoc(budgetDocRef); if (budgetDocSnap.exists()) { budget = budgetDocSnap.data().amount || 0; console.log("Budget loaded:", budget); } else { budget = 0; console.log("No budget document found for user. Setting budget to 0."); } } catch (error) { console.error("Error loading budget from Firestore: ", error.code, error.message, error); budget = 0; } console.log("Loading expenses..."); try { const expensesQuery = query( collection(db, EXPENSES_COLLECTION), where("userId", "==", currentUser.uid), orderBy("date", "desc") ); console.log("Expense query created for userId:", currentUser.uid); const expensesSnapshot = await getDocs(expensesQuery); expenses = []; console.log(`Found ${expensesSnapshot.docs.length} expense documents.`); expensesSnapshot.forEach(docSnap => { const expenseData = docSnap.data(); console.log("Processing expense doc:", docSnap.id, expenseData); expenses.push({ id: docSnap.id, ...expenseData }); }); console.log("Local expenses array populated:", expenses); } catch (error) { console.error("Error loading expenses from Firestore: ", error.code, error.message, error); expenses = []; } updateExpenseList(); }
+        async function deleteExpenseFromFirestore(expenseId) { if (!currentUser) { console.warn("Cannot delete expense, no user logged in."); return; } console.log(`Attempting to delete expense ${expenseId} for user ${currentUser.uid}`); try { const expenseDocRef = doc(db, EXPENSES_COLLECTION, expenseId); await deleteDoc(expenseDocRef); console.log("Expense deleted successfully from Firestore:", expenseId); } catch (error) { console.error("Error deleting expense from Firestore: ", error.code, error.message, error); alert("Error deleting expense."); throw error; } }
+        async function clearAllExpensesFromFirestore() { if (!currentUser) { console.warn("Cannot clear expenses, no user logged in."); return; } console.log(`Attempting to clear all expenses for user ${currentUser.uid}`); try { const expensesQuery = query( collection(db, EXPENSES_COLLECTION), where("userId", "==", currentUser.uid) ); const expensesSnapshot = await getDocs(expensesQuery); if (expensesSnapshot.empty) { console.log("No expenses to clear for user."); return; } const batch = writeBatch(db); expensesSnapshot.forEach(docSnap => { console.log("Adding to batch delete:", docSnap.id); batch.delete(docSnap.ref); }); await batch.commit(); console.log("All expenses cleared successfully from Firestore for user:", currentUser.uid); } catch (error) { console.error("Error clearing all expenses from Firestore: ", error.code, error.message, error); alert("Error clearing all expenses."); throw error; } }
+
+        // --- Event Listeners & UI Update Functions ---
+        budgetForm.addEventListener('submit', async function(event) { event.preventDefault(); if (!currentUser) { alert("Please log in to set a budget."); return; } const newBudget = parseFloat(monthlyBudgetInput.value); if (isNaN(newBudget) || newBudget < 0) { alert("Please enter a valid budget amount."); return; } budget = newBudget; monthlyBudgetInput.value = ''; await saveBudgetToFirestore(); updateBudgetUI(); });
+        expenseForm.addEventListener('submit', async function(event) { event.preventDefault(); if (!currentUser) { alert("Please log in to add expenses."); return; } const name = expenseNameInput.value.trim(); const amount = parseFloat(expenseAmountInput.value); const category = expenseCategoryInput.value; const date = expenseDateInput.value; if (!name || isNaN(amount) || amount <= 0 || !category || !date) { alert("Please fill in all fields with valid data."); return; } const newExpenseData = { name, amount, category, date, userId: currentUser.uid, createdAt: serverTimestamp() }; console.log("Attempting to add new expense:", newExpenseData); try { const docRef = await addDoc(collection(db, EXPENSES_COLLECTION), newExpenseData); console.log("Expense added successfully to Firestore with ID:", docRef.id); expenses.push({ id: docRef.id, ...newExpenseData, date: new Date(date), createdAt: new Date() }); // Ensure date is a Date object for sorting if needed, or rely on Firestore's string date for ordering
+            expenses.sort((a, b) => new Date(b.date) - new Date(a.date)); // Re-sort after adding new
+            updateExpenseList(); expenseForm.reset(); } catch (error) { console.error("Error adding expense to Firestore: ", error.code, error.message, error); alert("Failed to add expense. Please try again. Check console for details."); } });
+        
+        function updateBudgetUI() { 
+            totalExpenses = expenses.reduce((sum, exp) => sum + exp.amount, 0);
             let remaining = budget - totalExpenses;
-            document.getElementById('remaining-budget').innerText = `₹${remaining.toFixed(2)}`;
-            let spentPercentage = budget > 0 ? ((totalExpenses / budget) * 100).toFixed(2) : 0;
-            document.getElementById('percentage-spent').innerText = `${spentPercentage}%`;
+            currentBudgetDisplayEl.innerText = `₹${budget.toFixed(2)}`;
+            spentBudgetDisplayEl.innerText = `₹${totalExpenses.toFixed(2)}`;
+            remainingBudgetEl.innerText = `₹${remaining.toFixed(2)}`;
+            let spentPercentage = budget > 0 ? ((totalExpenses / budget) * 100) : 0;
+            spentPercentage = Math.max(0, Math.min(100, spentPercentage)); 
+            percentageSpentEl.innerText = `${spentPercentage.toFixed(1)}%`;
+            remainingBudgetEl.style.color = remaining < 0 ? 'var(--danger-color)' : 'var(--success-color)';
+            budgetProgressBar.style.width = `${spentPercentage}%`;
+            budgetProgressBar.innerText = `${spentPercentage.toFixed(0)}%`;
+            budgetProgressBar.setAttribute('aria-valuenow', spentPercentage);
+            budgetProgressBar.style.backgroundColor = (totalExpenses > budget && budget > 0) ? 'var(--danger-color)' : 'var(--secondary-color)';
+            totalExpensesDisplayEl.innerText = `₹${totalExpenses.toFixed(2)}`;
         }
 
         function updateExpenseList() {
-            const expenseList = document.getElementById('expense-list');
-            expenseList.innerHTML = "";
-            expenses.forEach(expense => {
-                let row = `<tr>
-                    <td>${expense.date}</td>
-                    <td>${expense.name}</td>
-                    <td>${expense.category}</td>
-                    <td>₹${expense.amount.toFixed(2)}</td>
-                </tr>`;
-                expenseList.innerHTML += row;
+            expenseListEl.innerHTML = "";
+            // Ensure expenses are sorted by date (descending) before rendering
+            // This is important if new expenses are pushed without re-fetching or if date format varies
+             expenses.sort((a, b) => {
+                const dateA = a.date instanceof Timestamp ? a.date.toDate() : new Date(a.date);
+                const dateB = b.date instanceof Timestamp ? b.date.toDate() : new Date(b.date);
+                return dateB - dateA;
             });
+
+            if (expenses.length === 0) {
+                expenseListEl.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No expenses added yet.</td></tr>';
+            } else {
+                expenses.forEach(expense => {
+                    let displayDate;
+                    // Handle date from Firestore (Timestamp or string) vs newly added (string or Date)
+                    if (expense.date instanceof Timestamp) {
+                        displayDate = expense.date.toDate().toLocaleDateString('en-GB');
+                    } else if (typeof expense.date === 'string' && expense.date.includes('-')) { 
+                        displayDate = new Date(expense.date).toLocaleDateString('en-GB');
+                    } else if (expense.date instanceof Date) {
+                         displayDate = expense.date.toLocaleDateString('en-GB');
+                    }
+                     else {
+                        displayDate = 'Invalid Date'; 
+                    }
+                    
+                    let row = `<tr>
+                        <td>${displayDate}</td>
+                        <td>${escapeHTML(expense.name)}</td>
+                        <td>${escapeHTML(expense.category)}</td>
+                        <td class="text-end">₹${expense.amount.toFixed(2)}</td>
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-outline-danger" onclick="window.deleteExpense('${expense.id}')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>`;
+                    expenseListEl.innerHTML += row;
+                });
+            }
+            updateBudgetUI(); 
+        }
+        
+        window.deleteExpense = async function(id) { 
+            if (!currentUser) return;
+            console.log("window.deleteExpense called for ID:", id);
+            const originalExpenses = [...expenses];
+            expenses = expenses.filter(expense => expense.id !== id);
+            updateExpenseList(); 
+            try {
+                await deleteExpenseFromFirestore(id);
+            } catch (error) {
+                console.error("Rollback UI due to delete error for expense ID:", id, error);
+                expenses = originalExpenses; 
+                updateExpenseList();
+            }
+        }
+        window.clearAllExpenses = async function() { 
+            if (!currentUser) return;
+            console.log("window.clearAllExpenses called");
+            if (confirm("Are you sure you want to clear all expenses? This action cannot be undone.")) {
+                const originalExpenses = [...expenses];
+                expenses = [];
+                updateExpenseList(); 
+                try {
+                    await clearAllExpensesFromFirestore();
+                } catch (error) {
+                    console.error("Rollback UI due to clear all error:", error);
+                    expenses = originalExpenses; 
+                    updateExpenseList();
+                }
+            }
+        }
+        function escapeHTML(str) { 
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+            if (typeof str !== 'string') return ''; 
+            return str.replace(/[&<>"']/g, function (m) { return map[m]; });
         }
 
-        function printExpenses() {
-            let printContent = document.querySelector(".dashboard-card").outerHTML;
-            let win = window.open("", "", "width=800,height=600");
-            win.document.write("<html><head><title>Print Expenses</title></head><body>");
-            win.document.write(printContent);
-            win.document.write("</body></html>");
-            win.document.close();
-            win.print();
+        window.printExpenses = function() { 
+            console.log("window.printExpenses called");
+            const printWindow = window.open("", "_blank", "width=1000,height=700");
+            const printCurrentDate = new Date().toLocaleString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            const remainingBalance = budget - totalExpenses;
+            let printContent = `
+                <html><head><title>Expense Report - ${printCurrentDate}</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
+                    h1 { color: #2c3e50; text-align: center; border-bottom: 2px solid #3498db; padding-bottom: 10px;}
+                    p { font-size: 14px; } .meta-info { text-align: center; margin-bottom: 25px; font-size: 12px; color: #555; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+                    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 14px; }
+                    th { background-color: #3498db; color: white; font-weight: bold; }
+                    tr:nth-child(even) { background-color: #f9f9f9; } tr:hover { background-color: #f1f1f1; }
+                    .summary { margin-top: 30px; padding: 15px; background-color: #f0f7ff; border-left: 5px solid #3498db; border-radius: 5px;}
+                    .summary p { margin: 8px 0; font-size: 16px; } .summary p span { font-weight: bold; color: #2c3e50; }
+                    .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #777; }
+                    .total-row td { font-weight: bold; background-color: #e9ecef; } .amount-col { text-align: right; }
+                </style>
+                </head><body><h1>Expense Report</h1><div class="meta-info">Generated on: ${printCurrentDate}</div>
+                <h2>Expense Details</h2><table><thead><tr>
+                <th>Date</th><th>Expense Name</th><th>Category</th><th class="amount-col">Amount</th>
+                </tr></thead><tbody>`;
+            if (expenses.length > 0) {
+                expenses.forEach(expense => {
+                    let displayDate;
+                    if (expense.date instanceof Timestamp) { 
+                        displayDate = expense.date.toDate().toLocaleDateString('en-GB');
+                    } else if (typeof expense.date === 'string' && expense.date.includes('-')) { 
+                        displayDate = new Date(expense.date).toLocaleDateString('en-GB');
+                    } else if (expense.date instanceof Date) {
+                         displayDate = expense.date.toLocaleDateString('en-GB');
+                    } else {
+                        displayDate = 'Invalid Date';
+                    }
+                    printContent += `<tr>
+                        <td>${displayDate}</td>
+                        <td>${escapeHTML(expense.name)}</td>
+                        <td>${escapeHTML(expense.category)}</td>
+                        <td class="amount-col">₹${expense.amount.toFixed(2)}</td>
+                    </tr>`;
+                });
+            } else {
+                printContent += `<tr><td colspan="4" style="text-align:center; padding: 20px; color: #777;">No expenses recorded.</td></tr>`;
+            }
+            printContent += `</tbody><tfoot><tr class="total-row">
+                <td colspan="3" style="text-align:right;">Total Expenses:</td>
+                <td class="amount-col">₹${totalExpenses.toFixed(2)}</td></tr></tfoot></table>
+                <div class="summary">
+                <p>Initial Budget Set: <span style="color: #27ae60;">₹${budget.toFixed(2)}</span></p>
+                <p>Total Amount Spent: <span style="color: #e74c3c;">₹${totalExpenses.toFixed(2)}</span></p>
+                <p>Remaining Balance: <span style="color: ${remainingBalance >= 0 ? '#27ae60' : '#e74c3c'};">₹${remainingBalance.toFixed(2)}</span></p>
+                </div><div class="footer">Professional Expense Tracker</div></body></html>`;
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+            setTimeout(() => { printWindow.print(); }, 250);
         }
+
+        // Initialize UI elements
+        currentDateEl.innerText = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+        console.log("Script fully loaded. Waiting for auth state changes...");
     </script>
 </body>
 </html>
