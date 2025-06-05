@@ -31,7 +31,7 @@
             --secondary-color: #3498db;   /* Keep action color vibrant */
             --success-color: #2ecc71;
             --danger-color: #e74c3c;
-            --light-bg: #20232A;        /* Dark background for body */
+            --light-bg: #20232A;         /* Dark background for body */
             --text-color: #ecf0f1;       /* Light text on dark background */
             --card-bg: #2c3038;       /* Darker card background */
             --table-header-bg: #34495e;
@@ -57,7 +57,7 @@
         }
 
         .header-text-color { 
-             color: var(--primary-color);
+            color: var(--primary-color);
         }
 
         .dashboard-card {
@@ -95,7 +95,7 @@
             background-color: #1f2c39; 
         }
         .dark-theme .btn-secondary:hover {
-             background-color: #566573; 
+            background-color: #566573; 
         }
 
         .stats-box {
@@ -140,7 +140,7 @@
             box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25); 
         }
          .dark-theme .form-control:focus, .dark-theme .form-select:focus {
-             box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25); 
+            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25); 
          }
 
         .form-label {
@@ -159,6 +159,21 @@
             color: var(--text-color);
             border: 1px solid var(--border-color);
         }
+        #category-budget-list .progress {
+            height: 12px;
+            font-size: 0.7rem;
+        }
+        #category-budget-list .form-control-sm {
+             padding: 0.25rem 0.5rem;
+             font-size: 0.875rem;
+        }
+        #category-budget-list .input-group-sm > .input-group-text {
+            padding: 0.25rem 0.5rem;
+        }
+        #category-budget-list label.col-form-label {
+            font-size: 0.9em;
+        }
+
     </style>
 </head>
 <body>
@@ -276,6 +291,10 @@
                                 </select>
                             </div>
                             <div class="mb-3">
+                                <label class="form-label fw-bold">Notes/Details (Optional)</label>
+                                <textarea class="form-control" id="expense-notes" rows="2" placeholder="e.g., Specific items purchased, reason for travel"></textarea>
+                            </div>
+                            <div class="mb-3">
                                 <label class="form-label fw-bold">Date</label>
                                 <input type="date" class="form-control" id="expense-date" required>
                             </div>
@@ -301,12 +320,13 @@
                                         <th>Date</th>
                                         <th>Name</th>
                                         <th>Category</th>
+                                        <th>Notes</th>
                                         <th class="text-end">Amount</th>
                                         <th class="text-center">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody id="expense-list">
-                                    </tbody>
+                                 </tbody>
                             </table>
                         </div>
                         <p class="text-end mt-3 fw-bold">Total Expenses for Month: <span id="total-expenses-display">₹0.00</span></p>
@@ -315,11 +335,11 @@
             </div>
 
             <div class="stats-box dashboard-card">
-                <h3 class="header-text-color"><i class="bi bi-cash-coin me-2" style="color: var(--success-color);"></i>Budget for <span id="budget-month-year-display" class="fw-normal"></span></h3>
+                <h3 class="header-text-color"><i class="bi bi-cash-coin me-2" style="color: var(--success-color);"></i>Overall Budget for <span id="budget-month-year-display" class="fw-normal"></span></h3>
                 <form id="budget-form" class="mb-3 mt-3 d-flex justify-content-center">
                     <div class="input-group w-auto">
                         <span class="input-group-text">₹</span>
-                        <input type="number" class="form-control" id="monthly-budget-input" placeholder="Set Budget for Month" style="max-width: 200px;" required>
+                        <input type="number" class="form-control" id="monthly-budget-input" placeholder="Set Overall Budget" style="max-width: 200px;" required>
                         <button type="submit" class="btn btn-success">
                             <i class="bi bi-check-circle me-1"></i>Set
                         </button>
@@ -327,12 +347,12 @@
                 </form>
                 <div class="row mt-3">
                     <div class="col-md-6">
-                        <p class="mb-1 fs-5">Budget: <span id="current-budget-display" class="fw-bold">₹0.00</span></p>
-                        <p class="mb-1 fs-5">Spent: <span id="spent-budget-display" class="fw-bold">₹0.00</span></p>
+                        <p class="mb-1 fs-5">Overall Budget: <span id="current-budget-display" class="fw-bold">₹0.00</span></p>
+                        <p class="mb-1 fs-5">Total Spent: <span id="spent-budget-display" class="fw-bold">₹0.00</span></p>
                     </div>
                     <div class="col-md-6">
-                        <p class="mb-1 fs-5">Remaining: <span id="remaining-budget" class="fw-bold" style="color: var(--success-color);">₹0.00</span></p>
-                        <p class="text-muted small">Percentage Spent: <span id="percentage-spent">0%</span></p>
+                        <p class="mb-1 fs-5">Overall Remaining: <span id="remaining-budget" class="fw-bold" style="color: var(--success-color);">₹0.00</span></p>
+                        <p class="text-muted small">Percentage of Overall Budget Spent: <span id="percentage-spent">0%</span></p>
                     </div>
                 </div>
                 <div class="progress mt-2" style="height: 20px;">
@@ -340,6 +360,16 @@
                 </div>
             </div>
             
+            <div class="dashboard-card mt-4">
+                <h4 class="header-text-color"><i class="bi bi-tags-fill me-2" style="color: var(--secondary-color);"></i>Category Budgets for <span id="category-budget-month-year-display" class="fw-normal"></span></h4>
+                <form id="category-budget-form" class="mt-3">
+                    <div id="category-budget-list" class="mb-3">
+                        </div>
+                    <button type="submit" class="btn btn-success btn-sm">
+                        <i class="bi bi-check-circle me-1"></i>Save Category Budgets
+                    </button>
+                </form>
+            </div>
             <button class="btn btn-secondary mt-3" onclick="window.printExpenses()">
                 <i class="bi bi-printer me-2"></i>Print Expenses for <span id="print-month-year-display" class="fw-normal"></span>
             </button>
@@ -379,7 +409,8 @@
         let currentUserName = "";
         let selectedMonthYear = ""; // YYYY-MM format
         let currentMonthExpenses = [];
-        let currentMonthBudget = 0;
+        let currentMonthBudget = 0; // Overall monthly budget
+        let currentMonthCategoryBudgets = {}; // NEW: For category-specific budgets
         let totalMonthExpenses = 0;
 
 
@@ -392,6 +423,7 @@
         const expenseNameInput = document.getElementById('expense-name');
         const expenseAmountInput = document.getElementById('expense-amount');
         const expenseCategoryInput = document.getElementById('expense-category');
+        const expenseNotesInput = document.getElementById('expense-notes'); // NEW
         const expenseDateInput = document.getElementById('expense-date');
         const remainingBudgetEl = document.getElementById('remaining-budget');
         const percentageSpentEl = document.getElementById('percentage-spent');
@@ -407,6 +439,9 @@
         const summaryMonthYearDisplay = document.getElementById('summary-month-year-display');
         const budgetMonthYearDisplay = document.getElementById('budget-month-year-display');
         const printMonthYearDisplay = document.getElementById('print-month-year-display');
+        const categoryBudgetMonthYearDisplay = document.getElementById('category-budget-month-year-display'); // NEW
+        const categoryBudgetForm = document.getElementById('category-budget-form'); // NEW
+        const categoryBudgetListEl = document.getElementById('category-budget-list'); // NEW
 
         const authContainer = document.getElementById('auth-container');
         const loginView = document.getElementById('login-view');
@@ -457,8 +492,8 @@
 
         // --- Firebase Collection Constants ---
         const USERS_COLLECTION = 'users';
-        const MONTHLY_BUDGETS_SUBCOLLECTION = 'monthlyBudgets'; // Subcollection under user
-        const EXPENSES_COLLECTION = 'expenses'; // Top-level collection for expenses
+        const MONTHLY_BUDGETS_SUBCOLLECTION = 'monthlyBudgets'; 
+        const EXPENSES_COLLECTION = 'expenses';
 
         // --- User Profile Management ---
         async function saveUserProfile(userId, name, email) {
@@ -539,10 +574,10 @@
                     loginView.style.display = 'none'; signupView.style.display = 'none'; forgotPasswordView.style.display = 'none';
                     userInfoDiv.style.display = 'block'; 
                     appContent.style.display = 'block'; 
-                    setDefaultMonthYear(); // This will also trigger loadDataForSelectedMonth
+                    setDefaultMonthYear();
                 } else { 
                     currentUser = null; currentUserName = ""; 
-                    selectedMonthYear = ""; currentMonthExpenses = []; currentMonthBudget = 0; totalMonthExpenses = 0;
+                    selectedMonthYear = ""; currentMonthExpenses = []; currentMonthBudget = 0; totalMonthExpenses = 0; currentMonthCategoryBudgets = {};
                     authContainer.style.display = 'block'; 
                     switchAuthView(loginView); 
                     userInfoDiv.style.display = 'none'; 
@@ -550,6 +585,7 @@
                     if(userIdentityDisplay) userIdentityDisplay.textContent = ""; 
                     updateExpenseList(); 
                     updateBudgetUI(); 
+                    populateCategoryBudgetForm();
                 } 
             });
         } else {
@@ -562,11 +598,12 @@
         function setDefaultMonthYear() {
             const today = new Date();
             const year = today.getFullYear();
-            const month = (today.getMonth() + 1).toString().padStart(2, '0'); // Ensure MM format
+            const month = (today.getMonth() + 1).toString().padStart(2, '0');
             selectedMonthYear = `${year}-${month}`;
             monthYearSelector.value = selectedMonthYear;
             updateSelectedMonthDisplaySpans();
             loadDataForSelectedMonth();
+             if (selectedMonthYear) expenseDateInput.value = selectedMonthYear + '-01';
         }
 
         monthYearSelector.addEventListener('change', () => {
@@ -574,7 +611,6 @@
             if (selectedMonthYear) {
                 updateSelectedMonthDisplaySpans();
                 loadDataForSelectedMonth();
-                // Set default date for new expense to the first of the selected month
                 expenseDateInput.value = selectedMonthYear + '-01';
             }
         });
@@ -588,64 +624,79 @@
             if (summaryMonthYearDisplay) summaryMonthYearDisplay.textContent = displayDate;
             if (budgetMonthYearDisplay) budgetMonthYearDisplay.textContent = displayDate;
             if (printMonthYearDisplay) printMonthYearDisplay.textContent = displayDate;
+            if (categoryBudgetMonthYearDisplay) categoryBudgetMonthYearDisplay.textContent = displayDate; // NEW
         }
 
-
-        // --- Firestore Data Handling for Selected Month ---
-        async function saveBudgetToFirestore() {
-            if (!currentUser || !db || !selectedMonthYear) { console.warn("Cannot save budget."); return; }
+        // --- Firestore Data Handling ---
+        async function saveOverallBudgetToFirestore() {
+            if (!currentUser || !db || !selectedMonthYear) { console.warn("Cannot save overall budget."); return; }
             const newBudgetAmount = parseFloat(monthlyBudgetInput.value);
-            if (isNaN(newBudgetAmount) || newBudgetAmount < 0) { 
-                alert("Please enter a valid budget amount."); 
-                return; // Don't clear input if invalid
+            if (isNaN(newBudgetAmount) || newBudgetAmount < 0) {
+                alert("Please enter a valid overall budget amount.");
+                return;
             }
-            currentMonthBudget = newBudgetAmount; // Optimistic update for UI
-            
+            currentMonthBudget = newBudgetAmount; 
+
             try {
                 const budgetDocRef = doc(db, USERS_COLLECTION, currentUser.uid, MONTHLY_BUDGETS_SUBCOLLECTION, selectedMonthYear);
-                await setDoc(budgetDocRef, { amount: currentMonthBudget, lastUpdated: serverTimestamp() });
-                console.log(`Budget for ${selectedMonthYear} saved: ${currentMonthBudget}`);
-                monthlyBudgetInput.value = ''; // Clear input only on success
-                updateBudgetUI(); // Update UI with the new budget
+                await setDoc(budgetDocRef, { amount: currentMonthBudget, lastUpdated: serverTimestamp() }, { merge: true });
+                console.log(`Overall budget for ${selectedMonthYear} saved: ${currentMonthBudget}`);
+                monthlyBudgetInput.value = '';
+                updateBudgetUI();
             } catch (error) {
-                console.error(`Error saving budget for ${selectedMonthYear}: `, error);
-                alert("Error saving budget.");
-                // Potentially revert optimistic update if needed, or reload data
+                console.error(`Error saving overall budget for ${selectedMonthYear}: `, error);
+                alert("Error saving overall budget.");
             }
         }
 
+        async function saveCategoryBudgetsToFirestore(categoryBudgetsData) {
+            if (!currentUser || !db || !selectedMonthYear) { console.warn("Cannot save category budgets."); return; }
+            try {
+                const budgetDocRef = doc(db, USERS_COLLECTION, currentUser.uid, MONTHLY_BUDGETS_SUBCOLLECTION, selectedMonthYear);
+                await setDoc(budgetDocRef, { categoryBudgets: categoryBudgetsData, lastUpdated: serverTimestamp() }, { merge: true });
+                currentMonthCategoryBudgets = categoryBudgetsData; 
+                console.log(`Category budgets for ${selectedMonthYear} saved.`);
+                alert("Category budgets saved successfully!");
+                populateCategoryBudgetForm(); 
+            } catch (error) {
+                console.error(`Error saving category budgets for ${selectedMonthYear}: `, error);
+                alert("Error saving category budgets.");
+            }
+        }
+        
         async function loadDataForSelectedMonth() { 
             if (!currentUser || !db || !selectedMonthYear) { console.warn("Cannot load data for month."); return; } 
             console.log(`Loading data for user ${currentUser.uid}, month ${selectedMonthYear}...`);
             
-            // Reset current month's data
             currentMonthBudget = 0;
+            currentMonthCategoryBudgets = {}; // Reset
             currentMonthExpenses = [];
 
-            // Load Budget for selected month
             try { 
                 const budgetDocRef = doc(db, USERS_COLLECTION, currentUser.uid, MONTHLY_BUDGETS_SUBCOLLECTION, selectedMonthYear);
                 const budgetDocSnap = await getDoc(budgetDocRef); 
                 if (budgetDocSnap.exists()) { 
-                    currentMonthBudget = budgetDocSnap.data().amount || 0; 
+                    const budgetData = budgetDocSnap.data();
+                    currentMonthBudget = budgetData.amount || 0; 
+                    currentMonthCategoryBudgets = budgetData.categoryBudgets || {}; // Load
                     console.log(`Budget for ${selectedMonthYear} loaded: ${currentMonthBudget}`); 
+                    console.log(`Category budgets for ${selectedMonthYear} loaded:`, currentMonthCategoryBudgets);
                 } else { 
-                    console.log(`No budget document found for ${selectedMonthYear}. Setting budget to 0.`); 
+                    console.log(`No budget document found for ${selectedMonthYear}.`); 
                 }
-            } catch (error) { console.error(`Error loading budget for ${selectedMonthYear}: `, error); currentMonthBudget = 0; } 
+            } catch (error) { console.error(`Error loading budget for ${selectedMonthYear}: `, error); currentMonthBudget = 0; currentMonthCategoryBudgets = {};} 
             
-            // Load Expenses for selected month
             try {
                 const startDate = selectedMonthYear + "-01";
                 const [year, month] = selectedMonthYear.split('-').map(Number);
-                const nextMonthDate = new Date(year, month, 1); // month is 0-indexed for Date constructor, but `month` var is 1-indexed
+                const nextMonthDate = new Date(year, month, 1);
                 const endDate = `${nextMonthDate.getFullYear()}-${(nextMonthDate.getMonth() + 1).toString().padStart(2, '0')}-01`;
 
                 const expensesQuery = query( 
                     collection(db, EXPENSES_COLLECTION), 
                     where("userId", "==", currentUser.uid),
                     where("date", ">=", startDate),
-                    where("date", "<", endDate), // Expenses on the first day of next month are excluded
+                    where("date", "<", endDate), 
                     orderBy("date", "desc") 
                 ); 
                 const expensesSnapshot = await getDocs(expensesQuery); 
@@ -653,7 +704,8 @@
                 console.log(`Loaded ${currentMonthExpenses.length} expenses for ${selectedMonthYear}.`);
             } catch (error) { console.error(`Error loading expenses for ${selectedMonthYear}: `, error); currentMonthExpenses = []; } 
             
-            updateExpenseList(); // This will also call updateBudgetUI
+            updateExpenseList(); 
+            populateCategoryBudgetForm(); // NEW
         }
         
         async function deleteExpenseFromFirestore(expenseId) { 
@@ -693,7 +745,7 @@
         budgetForm.addEventListener('submit', async function(event) { 
             event.preventDefault(); 
             if (!currentUser || !db) { alert("Please log in to set a budget."); return; } 
-            await saveBudgetToFirestore(); 
+            await saveOverallBudgetToFirestore(); 
         });
 
         expenseForm.addEventListener('submit', async function(event) { 
@@ -702,26 +754,24 @@
             const name = expenseNameInput.value.trim(); 
             const amount = parseFloat(expenseAmountInput.value); 
             const category = expenseCategoryInput.value; 
-            const dateStr = expenseDateInput.value; // YYYY-MM-DD
+            const notes = expenseNotesInput.value.trim(); // NEW
+            const dateStr = expenseDateInput.value; 
             if (!name || isNaN(amount) || amount <= 0 || !category || !dateStr) { alert("Please fill in all fields with valid data."); return; } 
             
-            const expenseMonthYear = dateStr.substring(0, 7); // YYYY-MM from expense date
+            const expenseMonthYear = dateStr.substring(0, 7); 
 
-            const newExpenseData = { name, amount, category, date: dateStr, userId: currentUser.uid, createdAt: serverTimestamp() }; 
+            const newExpenseData = { name, amount, category, notes, date: dateStr, userId: currentUser.uid, createdAt: serverTimestamp() }; // Added notes
             try { 
                 const docRef = await addDoc(collection(db, EXPENSES_COLLECTION), newExpenseData); 
                 
-                // If the added expense is for the currently selected month, update list
                 if (expenseMonthYear === selectedMonthYear) {
-                    currentMonthExpenses.push({ id: docRef.id, ...newExpenseData, createdAt: new Date() }); // Approx createdAt for local sort
+                    currentMonthExpenses.push({ id: docRef.id, ...newExpenseData, createdAt: new Date() }); 
                     updateExpenseList(); 
                 } else {
-                    // If added to a different month, just inform or simply don't update current view
                     console.log(`Expense added for ${expenseMonthYear}, current view is ${selectedMonthYear}.`);
                     alert(`Expense for ${new Date(dateStr).toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'})} added successfully. View that month to see it.`);
                 }
                 expenseForm.reset(); 
-                // Reset date input to first of currently selected month
                 if (selectedMonthYear) expenseDateInput.value = selectedMonthYear + '-01';
             } catch (error) { console.error("Error adding expense to Firestore: ", error); alert("Failed to add expense."); } 
         });
@@ -749,14 +799,13 @@
         function updateExpenseList() {
             expenseListEl.innerHTML = "";
             currentMonthExpenses.sort((a, b) => { 
-                 // Date is string "YYYY-MM-DD" or a Firebase Timestamp if just added/loaded differently
                 const dateAStr = (a.date instanceof Timestamp) ? a.date.toDate().toISOString().split('T')[0] : a.date;
                 const dateBStr = (b.date instanceof Timestamp) ? b.date.toDate().toISOString().split('T')[0] : b.date;
-                return dateBStr.localeCompare(dateAStr); // Descending by date string
+                return dateBStr.localeCompare(dateAStr); 
             });
 
             if (currentMonthExpenses.length === 0) {
-                expenseListEl.innerHTML = `<tr><td colspan="5" class="text-center text-muted">No expenses added for ${selectedMonthYear ? new Date(selectedMonthYear + '-01').toLocaleString('default', {month:'long', year:'numeric'}) : 'this month'} yet.</td></tr>`;
+                expenseListEl.innerHTML = `<tr><td colspan="6" class="text-center text-muted">No expenses added for ${selectedMonthYear ? new Date(selectedMonthYear + '-01').toLocaleString('default', {month:'long', year:'numeric'}) : 'this month'} yet.</td></tr>`; // Colspan 6
             } else {
                 currentMonthExpenses.forEach(expense => {
                     let displayDate;
@@ -771,7 +820,7 @@
                         <td>${displayDate}</td>
                         <td>${escapeHTML(expense.name)}</td>
                         <td>${escapeHTML(expense.category)}</td>
-                        <td class="text-end">₹${expense.amount.toFixed(2)}</td>
+                        <td>${escapeHTML(expense.notes || '')}</td> <td class="text-end">₹${expense.amount.toFixed(2)}</td>
                         <td class="text-center">
                             <button class="btn btn-sm btn-outline-danger" onclick="window.deleteExpense('${expense.id}')">
                                 <i class="bi bi-trash"></i>
@@ -782,16 +831,19 @@
                 });
             }
             updateBudgetUI(); 
+            if (currentUser && db && selectedMonthYear) {
+                 populateCategoryBudgetForm(); // Refresh category display
+            }
         }
         
         window.deleteExpense = async function(id) { 
             if (!currentUser || !id || !db) return;
             const originalExpenses = [...currentMonthExpenses];
             currentMonthExpenses = currentMonthExpenses.filter(expense => expense.id !== id);
-            updateExpenseList(); // Optimistic UI update
+            updateExpenseList(); 
             try { await deleteExpenseFromFirestore(id); } 
             catch (error) { 
-                currentMonthExpenses = originalExpenses; // Revert on error
+                currentMonthExpenses = originalExpenses; 
                 updateExpenseList(); 
             }
         }
@@ -805,11 +857,96 @@
                 updateExpenseList(); 
                 try { await clearMonthExpensesFromFirestore(); } 
                 catch (error) { 
-                    currentMonthExpenses = originalExpenses; // Revert on error
+                    currentMonthExpenses = originalExpenses; 
                     updateExpenseList(); 
                 }
             }
         });
+
+        function populateCategoryBudgetForm() {
+            if (!categoryBudgetListEl || !expenseCategoryInput) return;
+            categoryBudgetListEl.innerHTML = ''; 
+
+            const categories = Array.from(expenseCategoryInput.options)
+                .map(option => option.value)
+                .filter(value => value !== ""); 
+
+            if (categories.length === 0 && Object.keys(currentMonthCategoryBudgets).length === 0) {
+                categoryBudgetListEl.innerHTML = '<p class="text-muted small">No categories defined in the expense form to set budgets for. Add expenses with categories first, or manually define categories if needed.</p>';
+                return;
+            }
+            
+            // Ensure all categories with existing budgets or expenses are shown
+            const allRelevantCategories = Array.from(new Set([
+                ...categories, 
+                ...Object.keys(currentMonthCategoryBudgets),
+                ...currentMonthExpenses.map(exp => exp.category)
+            ])).filter(Boolean).sort();
+
+
+            if (allRelevantCategories.length === 0) {
+                 categoryBudgetListEl.innerHTML = '<p class="text-muted small">No categories available to set budgets for.</p>';
+                 return;
+            }
+
+
+            allRelevantCategories.forEach(category => {
+                const budgetForCategory = parseFloat(currentMonthCategoryBudgets[category] || 0);
+                const spentForCategory = currentMonthExpenses
+                    .filter(exp => exp.category === category)
+                    .reduce((sum, exp) => sum + exp.amount, 0);
+                
+                const remainingCategoryBudget = budgetForCategory - spentForCategory;
+                let categorySpentPercentage = budgetForCategory > 0 ? Math.min(100, (spentForCategory / budgetForCategory) * 100) : (spentForCategory > 0 ? 100 : 0);
+                categorySpentPercentage = Math.max(0, categorySpentPercentage);
+                const sanitizedCategoryId = `cat-budget-${category.replace(/[^a-zA-Z0-9-_]/g, '')}`;
+
+
+                const categoryRow = document.createElement('div');
+                categoryRow.classList.add('mb-3', 'row', 'g-2', 'align-items-center');
+                categoryRow.innerHTML = `
+                    <label for="${sanitizedCategoryId}" class="col-md-3 col-form-label fw-normal">${escapeHTML(category)}</label>
+                    <div class="col-md-3">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text">₹</span>
+                            <input type="number" class="form-control form-control-sm category-budget-input" id="${sanitizedCategoryId}" data-category="${escapeHTML(category)}" value="${budgetForCategory.toFixed(2)}" step="0.01" placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="d-flex justify-content-between">
+                           <small class="text-muted">Spent: ₹${spentForCategory.toFixed(2)}</small>
+                           <small class="text-muted">${categorySpentPercentage.toFixed(0)}%</small>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar" role="progressbar" style="width: ${categorySpentPercentage}%; background-color: ${remainingCategoryBudget < 0 && budgetForCategory > 0 ? 'var(--danger-color)' : (budgetForCategory === 0 && spentForCategory > 0 ? 'var(--danger-color)' : 'var(--secondary-color)')};" aria-valuenow="${categorySpentPercentage}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                         <small class="text-muted d-block text-end">Remaining: <span style="color: ${remainingCategoryBudget >= 0 ? 'var(--success-color)' : 'var(--danger-color)'};">₹${remainingCategoryBudget.toFixed(2)}</span></small>
+                    </div>
+                `;
+                categoryBudgetListEl.appendChild(categoryRow);
+            });
+        }
+
+        if (categoryBudgetForm) {
+            categoryBudgetForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                if (!currentUser || !db) { alert("Please log in to set category budgets."); return; }
+
+                const newCategoryBudgetsData = {};
+                const inputs = categoryBudgetListEl.querySelectorAll('.category-budget-input');
+                inputs.forEach(input => {
+                    const categoryName = input.dataset.category;
+                    const budgetAmount = parseFloat(input.value);
+                    if (categoryName && !isNaN(budgetAmount) && budgetAmount >= 0) {
+                        newCategoryBudgetsData[categoryName] = budgetAmount;
+                    } else if (categoryName) {
+                        newCategoryBudgetsData[categoryName] = 0; 
+                    }
+                });
+                await saveCategoryBudgetsToFirestore(newCategoryBudgetsData);
+            });
+        }
+
 
         function escapeHTML(str) { 
             if (typeof str !== 'string') return ''; 
@@ -834,27 +971,44 @@
                 <style>
                     body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
                     h1 { color: #2c3e50; text-align: center; border-bottom: 2px solid #3498db; padding-bottom: 10px;}
-                    h2 { color: #34495e; margin-top: 25px; }
+                    h2 { color: #34495e; margin-top: 25px; border-bottom: 1px solid #ccc; padding-bottom: 5px;}
                     p { font-size: 14px; } .meta-info { text-align: center; margin-bottom: 25px; font-size: 12px; color: #555; }
-                    table { width: 100%; border-collapse: collapse; margin-top: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-                    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; font-size: 14px; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+                    th, td { border: 1px solid #ddd; padding: 8px 10px; text-align: left; font-size: 13px; word-break: break-word; }
                     th { background-color: #3498db; color: white; font-weight: bold; }
                     tr:nth-child(even) { background-color: #f9f9f9; } tr:hover { background-color: #f1f1f1; }
-                    .summary { margin-top: 30px; padding: 15px; background-color: #f0f7ff; border-left: 5px solid #3498db; border-radius: 5px;}
-                    .summary p { margin: 8px 0; font-size: 16px; } .summary p span { font-weight: bold; color: #2c3e50; }
+                    .summary, .category-summary-print { margin-top: 25px; padding: 15px; background-color: #f0f7ff; border-left: 5px solid #3498db; border-radius: 5px;}
+                    .summary p, .category-summary-print p { margin: 6px 0; font-size: 15px; } .summary p span, .category-summary-print p span { font-weight: bold; color: #2c3e50; }
                     .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #777; }
                     .total-row td { font-weight: bold; background-color: #e9ecef; } .amount-col { text-align: right; }
+                    .notes-col { max-width: 200px; min-width:150px; }
+                    .category-budget-item-print { margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px dotted #eee; }
+                    .category-budget-item-print:last-child { border-bottom: none; }
+                    .category-budget-item-print .progress-print { height: 10px; margin-top: 4px; background-color: #e9ecef; border-radius: 5px; overflow: hidden; width: 100%;}
+                    .category-budget-item-print .progress-bar-print { background-color: #3498db; height: 100%; display:block; }
                 </style>
                 </head><body><h1>Expense Report for ${printMonthName}</h1>
                 <div class="meta-info">Generated by: ${escapeHTML(currentUserName) || (currentUser ? currentUser.email : 'N/A')} on ${printCurrentDate}</div>
-                <h2>Expense Details</h2><table><thead><tr>
-                <th>Date</th><th>Expense Name</th><th>Category</th><th class="amount-col">Amount</th>
+
+                <h2>Overall Monthly Summary</h2>
+                <div class="summary">
+                    <p>Overall Monthly Budget: <span style="color: #27ae60;">₹${currentMonthBudget.toFixed(2)}</span></p>
+                    <p>Total Amount Spent: <span style="color: #e74c3c;">₹${totalMonthExpenses.toFixed(2)}</span></p>
+                    <p>Remaining Overall Balance: <span style="color: ${remainingBalance >= 0 ? '#27ae60' : '#e74c3c'};">₹${remainingBalance.toFixed(2)}</span></p>
+                </div>
+
+                <h2>Expense Details</h2>
+                <table><thead><tr>
+                <th>Date</th><th>Expense Name</th><th>Category</th><th class="notes-col">Notes</th><th class="amount-col">Amount</th>
                 </tr></thead><tbody>`;
             
-            const sortedExpensesForPrint = [...currentMonthExpenses].sort((a, b) => { // Already sorted by date desc in updateExpenseList, but can re-sort if needed
+            const sortedExpensesForPrint = [...currentMonthExpenses].sort((a, b) => {
                 const dateA = (a.date instanceof Timestamp) ? a.date.toDate().toISOString().split('T')[0] : a.date;
                 const dateB = (b.date instanceof Timestamp) ? b.date.toDate().toISOString().split('T')[0] : b.date;
-                return dateB.localeCompare(dateA); // Keep descending for print
+                if (dateB.localeCompare(dateA) !== 0) return dateB.localeCompare(dateA);
+                const timeA = a.createdAt instanceof Timestamp ? a.createdAt.toMillis() : (a.createdAt instanceof Date ? a.createdAt.getTime() : Date.parse(a.date));
+                const timeB = b.createdAt instanceof Timestamp ? b.createdAt.toMillis() : (b.createdAt instanceof Date ? b.createdAt.getTime() : Date.parse(b.date));
+                return timeB - timeA;
             });
 
             if (sortedExpensesForPrint.length > 0) {
@@ -870,29 +1024,59 @@
                         <td>${displayDate}</td>
                         <td>${escapeHTML(expense.name)}</td>
                         <td>${escapeHTML(expense.category)}</td>
+                        <td class="notes-col">${escapeHTML(expense.notes || '')}</td>
                         <td class="amount-col">₹${expense.amount.toFixed(2)}</td>
                     </tr>`;
                 });
             } else {
-                printContent += `<tr><td colspan="4" style="text-align:center; padding: 20px; color: #777;">No expenses recorded for ${printMonthName}.</td></tr>`;
+                printContent += `<tr><td colspan="5" style="text-align:center; padding: 20px; color: #777;">No expenses recorded for ${printMonthName}.</td></tr>`;
             }
             printContent += `</tbody><tfoot><tr class="total-row">
-                <td colspan="3" style="text-align:right;">Total Expenses for ${printMonthName}:</td>
-                <td class="amount-col">₹${totalMonthExpenses.toFixed(2)}</td></tr></tfoot></table>
-                <div class="summary">
-                <p>Budget for ${printMonthName}: <span style="color: #27ae60;">₹${currentMonthBudget.toFixed(2)}</span></p>
-                <p>Total Amount Spent: <span style="color: #e74c3c;">₹${totalMonthExpenses.toFixed(2)}</span></p>
-                <p>Remaining Balance: <span style="color: ${remainingBalance >= 0 ? '#27ae60' : '#e74c3c'};">₹${remainingBalance.toFixed(2)}</span></p>
-                </div><div class="footer">Professional Expense Tracker</div></body></html>`;
+                <td colspan="4" style="text-align:right;">Total Expenses for ${printMonthName}:</td>
+                <td class="amount-col">₹${totalMonthExpenses.toFixed(2)}</td></tr></tfoot></table>`;
+
+            const allPrintCategories = Array.from(new Set([
+                ...Object.keys(currentMonthCategoryBudgets), 
+                ...currentMonthExpenses.map(e => e.category)
+            ])).filter(Boolean).sort();
+
+            if (allPrintCategories.length > 0) {
+                printContent += `<h2>Category Budget Summary</h2><div class="category-summary-print">`;
+                allPrintCategories.forEach(category => {
+                    const budget = parseFloat(currentMonthCategoryBudgets[category] || 0);
+                    const spent = currentMonthExpenses
+                        .filter(exp => exp.category === category)
+                        .reduce((sum, exp) => sum + exp.amount, 0);
+                    const remainingCatBudget = budget - spent;
+                    let catSpentPercent = budget > 0 ? Math.min(100, (spent / budget) * 100) : (spent > 0 ? 100 : 0);
+                    catSpentPercent = Math.max(0, catSpentPercent);
+                    const progressBarColor = remainingCatBudget < 0 && budget > 0 ? '#e74c3c' : (budget === 0 && spent > 0 ? '#e74c3c' : '#27ae60');
+
+                    printContent += `
+                    <div class="category-budget-item-print">
+                        <strong>${escapeHTML(category)}:</strong><br>
+                        Budget: ₹${budget.toFixed(2)} | Spent: ₹${spent.toFixed(2)} 
+                        <span style="color: ${remainingCatBudget >= 0 ? '#27ae60' : '#e74c3c'}; float: right;">(Remaining: ₹${remainingCatBudget.toFixed(2)})</span>
+                        <div class="progress-print">
+                            <span class="progress-bar-print" style="width: ${catSpentPercent}%; background-color: ${progressBarColor};"></span>
+                        </div>
+                    </div>`;
+                });
+                printContent += `</div>`;
+            } else {
+                 printContent += `<h2>Category Budget Summary</h2><div class="category-summary-print"><p>No category-specific budgets set or expenses categorized for ${printMonthName}.</p></div>`;
+            }
+
+            printContent += `<div class="footer">Professional Expense Tracker</div></body></html>`;
             
             printWindow.document.write(printContent);
             printWindow.document.close();
-            setTimeout(() => { printWindow.print(); }, 250); // Allow content to load before printing
+            setTimeout(() => { printWindow.print(); }, 350); 
         }
 
         // Initialize UI elements
         if (currentDateEl) currentDateEl.innerText = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-        switchAuthView(loginView); // Start by showing the login view
+        switchAuthView(loginView); 
         console.log("Script fully loaded. Waiting for auth state changes if Firebase initialized.");
     </script>
 </body>
