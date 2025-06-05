@@ -689,7 +689,6 @@
                 const budgetDocRef = doc(db, USERS_COLLECTION, currentUser.uid, MONTHLY_BUDGETS_SUBCOLLECTION, selectedMonthYear);
                 await setDoc(budgetDocRef, { categoryBudgets: categoryBudgetsData, lastUpdated: serverTimestamp() }, { merge: true });
                 console.log(`Category budgets for ${selectedMonthYear} saved.`);
-                // No alert here, rely on renderCategoryBudgetsSummary to update UI which confirms visually.
                 renderCategoryBudgetsSummary();
             } catch (error) {
                 console.error(`Error saving category budgets for ${selectedMonthYear}: `, error);
@@ -903,7 +902,7 @@
 
         function populateCategoryBudgetDropdown() {
             if (!selectCategoryForBudget || !expenseCategoryInput) return;
-            const currentValue = selectCategoryForBudget.value; // Preserve selection if possible
+            const currentValue = selectCategoryForBudget.value; 
             selectCategoryForBudget.innerHTML = '<option value="">-- Choose Category --</option>';
 
             const categories = Array.from(expenseCategoryInput.options)
@@ -916,7 +915,7 @@
                 option.textContent = category;
                 selectCategoryForBudget.appendChild(option);
             });
-            if (categories.includes(currentValue)) { // Restore selection
+            if (categories.includes(currentValue)) { 
                  selectCategoryForBudget.value = currentValue;
             }
         }
@@ -934,7 +933,7 @@
                     alert("Please select a category.");
                     return;
                 }
-                 if (budgetAmountStr.trim() === "") { // Allow setting to 0 explicitly
+                 if (budgetAmountStr.trim() === "") { 
                      alert("Please enter a budget amount (can be 0 to clear).");
                      return;
                  }
@@ -978,7 +977,7 @@
             }
 
             const table = document.createElement('table');
-            table.classList.add('table', 'table-sm', 'table-hover', 'border'); // Added border to table
+            table.classList.add('table', 'table-sm', 'table-hover', 'border');
             table.style.fontSize = '0.85rem';
             const thead = table.createTHead();
             const headerRow = thead.insertRow();
@@ -1018,7 +1017,7 @@
                 const progressDiv = document.createElement('div');
                 progressDiv.classList.add('progress');
                 progressDiv.style.height = '12px';
-                progressDiv.style.backgroundColor = 'var(--even-row-bg)'; // Background for progress track
+                progressDiv.style.backgroundColor = 'var(--even-row-bg)';
                 const progressBarDiv = document.createElement('div');
                 progressBarDiv.classList.add('progress-bar');
                 progressBarDiv.style.width = `${categorySpentPercentage}%`;
@@ -1044,9 +1043,9 @@
             return str.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
         }
 
-        // =====================================================================
-        // START OF UPDATED generateExpenseReportHTML FUNCTION
-        // =====================================================================
+        // ====================================================================================
+        // START OF REVISED generateExpenseReportHTML FUNCTION (Mobile PDF Compatibility Focus)
+        // ====================================================================================
         function generateExpenseReportHTML() {
             if (!selectedMonthYear) {
                 alert("Please select a month to generate the report.");
@@ -1057,168 +1056,131 @@
             const printCurrentDate = new Date().toLocaleString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
             const remainingBalance = currentMonthBudget - totalMonthExpenses;
 
+            const formatCurrency = (num) => `₹${parseFloat(num || 0).toFixed(2)}`;
+
             let reportHTML = `
                 <!DOCTYPE html>
                 <html lang="en">
                 <head>
                     <meta charset="UTF-8">
-                    <title>Expense Report - ${printMonthName}</title>
+                    <title>Expense Report - ${escapeHTML(printMonthName)}</title>
                     <style>
-                        /* Base document styles for printing */
                         body {
-                            font-family: Arial, sans-serif;
-                            margin: 0;
-                            padding: 0;
-                            background-color: #ffffff !important; /* Ensure light background */
-                            color: #333333 !important; /* Ensure dark text */
-                            -webkit-print-color-adjust: exact !important; /* Honor specified colors */
-                            print-color-adjust: exact !important;
-                            font-size: 12px; /* Base font size for print */
+                            font-family: Arial, Helvetica, sans-serif !important; /* Basic, widely available fonts */
+                            margin: 0.5in !important; /* Standard print margin */
+                            padding: 0 !important;
+                            background-color: #ffffff !important; /* Enforce white background */
+                            color: #000000 !important; /* Enforce black text */
+                            -webkit-print-color-adjust: exact !important; /* Crucial for background colors */
+                            print-color-adjust: exact !important; /* Standard property */
+                            font-size: 10pt !important; /* A good base size for print */
+                            line-height: 1.3 !important; /* Spacing for readability */
                         }
-                        /* Container for the report content */
                         .report-container {
-                            max-width: 800px;
-                            margin: 20px auto;
-                            padding: 20px;
-                            border: 1px solid #cccccc !important;
-                            background-color: #ffffff !important; /* Ensure container is also white */
+                            width: 100%;
+                            background-color: #ffffff !important; /* Ensure container is white */
                         }
-                        /* Headings */
+                        /* Universal reset for common text elements in the report for consistency */
+                        h1, h2, p, span, strong, th, td, div {
+                            font-family: Arial, Helvetica, sans-serif !important;
+                            color: #000000 !important; /* Default to black */
+                            margin: 0; 
+                            padding: 0;
+                            background-color: transparent !important; /* Ensure no unexpected backgrounds */
+                        }
                         h1 {
-                            font-size: 20px !important;
-                            color: #2c3e50 !important;
-                            text-align: center;
-                            border-bottom: 2px solid #3498db !important;
-                            padding-bottom: 10px;
-                            margin-top: 0;
-                            margin-bottom: 15px;
+                            font-size: 16pt !important;
+                            text-align: center !important;
+                            border-bottom: 1px solid #000000 !important; /* Simple black border */
+                            padding-bottom: 5pt !important;
+                            margin-bottom: 10pt !important;
                         }
                         h2 {
-                            font-size: 16px !important;
-                            color: #34495e !important;
-                            margin-top: 20px;
-                            margin-bottom: 10px;
-                            border-bottom: 1px solid #cccccc !important;
-                            padding-bottom: 5px;
+                            font-size: 12pt !important;
+                            margin-top: 12pt !important;
+                            margin-bottom: 5pt !important;
+                            border-bottom: 1px solid #333333 !important;
+                            padding-bottom: 2pt !important;
                         }
                         .meta-info {
-                            text-align: center;
-                            margin-bottom: 20px;
-                            font-size: 11px !important;
-                            color: #555555 !important;
+                            text-align: center !important;
+                            margin-bottom: 12pt !important;
+                            font-size: 9pt !important;
+                            color: #333333 !important;
                         }
-                        /* Table styles */
                         table {
-                            width: 100%;
-                            border-collapse: collapse;
-                            margin-top: 10px;
+                            width: 100% !important;
+                            border-collapse: collapse !important;
+                            margin-top: 5pt !important;
+                            border: 1px solid #000000 !important; /* Black border for table */
                         }
                         th, td {
-                            border: 1px solid #aaaaaa !important;
-                            padding: 6px 8px;
-                            text-align: left;
-                            font-size: 11px !important;
-                            word-break: break-word;
+                            border: 1px solid #000000 !important; /* Black borders for cells */
+                            padding: 3pt 5pt !important;
+                            text-align: left !important;
+                            font-size: 9pt !important;
+                            vertical-align: top !important;
                         }
                         th {
-                            background-color: #3498db !important;
-                            color: #ffffff !important;
+                            background-color: #f0f0f0 !important; /* Light gray background for headers */
+                            color: #000000 !important; /* Black text */
                             font-weight: bold !important;
+                            text-align: center !important;
                         }
-                        td {
-                            color: #333333 !important;
+                        /* td { background-color: #ffffff !important; } */ /* Redundant due to body bg */
+                        
+                        .summary-section {
+                            margin-top: 10pt !important;
+                            padding: 5pt 0 !important;
+                            border-top: 1px solid #cccccc !important;
                         }
-                        tr:nth-child(even) td {
-                            background-color: #f0f0f0 !important;
+                        .summary-section p {
+                            margin: 2pt 0 !important;
+                            font-size: 10pt !important;
                         }
-                        tr:nth-child(odd) td {
-                            background-color: #ffffff !important;
-                        }
-                        /* Summary sections */
-                        .summary, .category-summary-print {
-                            margin-top: 20px;
-                            padding: 10px 15px;
-                            background-color: #eaf4ff !important;
-                            border-left: 4px solid #3498db !important;
-                            border-top: 1px solid #cce0ff !important;
-                            border-right: 1px solid #cce0ff !important;
-                            border-bottom: 1px solid #cce0ff !important;
-                            border-radius: 0px;
-                        }
-                        .summary p, .category-summary-print p {
-                            margin: 5px 0;
-                            font-size: 12px !important;
-                            color: #333333 !important;
-                        }
-                        .summary p span, .category-summary-print p span {
+                        .summary-section strong, .summary-section span { /* Ensure bold text is black */
                             font-weight: bold !important;
-                            color: #2c3e50 !important;
+                            color: #000000 !important;
                         }
                         .footer {
-                            text-align: center;
-                            margin-top: 25px;
-                            font-size: 10px !important;
-                            color: #777777 !important;
+                            text-align: center !important;
+                            margin-top: 12pt !important;
+                            font-size: 8pt !important;
+                            color: #333333 !important;
+                            border-top: 1px solid #cccccc !important;
+                            padding-top: 4pt !important;
                         }
                         .total-row td {
                             font-weight: bold !important;
-                            background-color: #e0e0e0 !important;
+                            background-color: #e9e9e9 !important; /* Light gray for total row */
                             color: #000000 !important;
                         }
-                        .amount-col { text-align: right !important; }
-                        .notes-col { max-width: 150px; min-width:100px; }
+                        .amount-col {
+                            text-align: right !important;
+                            white-space: nowrap !important;
+                        }
+                        .notes-col {
+                             width: 25%; /* Relative width for notes */
+                             word-wrap: break-word;
+                             word-break: break-all; /* Force break for very long words */
+                        }
+                        .positive-remaining { color: #000000 !important; font-weight: bold !important; } /* Keep positive remaining black */
+                        .negative-remaining { color: #000000 !important; font-weight: bold !important; } /* Keep negative remaining black for simplicity, sign indicates */
 
-                        /* Category budget item specific styles */
-                        .category-budget-item-print {
-                            margin-bottom: 8px;
-                            padding-bottom: 4px;
-                            border-bottom: 1px dotted #cccccc !important;
-                            color: #333333 !important;
-                            font-size: 11px !important;
-                        }
-                        .category-budget-item-print:last-child { border-bottom: none !important; }
-                        .category-budget-item-print strong { color: #1c2833 !important; font-weight: bold !important; }
-
-                        .category-budget-item-print .progress-print {
-                            height: 10px !important;
-                            margin-top: 3px;
-                            background-color: #d0d0d0 !important;
-                            border-radius: 4px !important;
-                            overflow: hidden;
-                            width: 100%;
-                            border: 1px solid #b0b0b0 !important;
-                        }
-                        .category-budget-item-print .progress-bar-print {
-                            height: 100% !important;
-                            display: block !important;
-                            text-align: center !important;
-                            color: #ffffff !important;
-                            font-size: 9px !important;
-                            line-height: 10px !important;
-                        }
-                        .positive-remaining { color: #1e8449 !important; font-weight: bold !important; }
-                        .negative-remaining { color: #c0392b !important; font-weight: bold !important; }
-                        .progress-bar-green { background-color: #27ae60 !important; }
-                        .progress-bar-red { background-color: #e74c3c !important; }
-
-                        /* Ensure links are printable */
-                        a, a:visited {
-                            color: #3498db !important;
-                            text-decoration: underline !important;
-                        }
                         @page {
-                           margin: 0.75in; /* Standard margins for printing */
+                           size: A4 portrait;
+                           margin: 0.5in !important;
                         }
                     </style>
                 </head><body><div class="report-container">
-                <h1>Expense Report for ${printMonthName}</h1>
-                <div class="meta-info">Generated by: ${escapeHTML(currentUserName) || (currentUser ? currentUser.email : 'N/A')} on ${printCurrentDate}</div>
+                <h1>Expense Report: ${escapeHTML(printMonthName)}</h1>
+                <div class="meta-info">Generated by: ${escapeHTML(currentUserName) || (currentUser ? escapeHTML(currentUser.email) : 'N/A')} on ${escapeHTML(printCurrentDate)}</div>
 
                 <h2>Overall Monthly Summary</h2>
-                <div class="summary">
-                    <p>Overall Monthly Budget: <span>₹${currentMonthBudget.toFixed(2)}</span></p>
-                    <p>Total Amount Spent: <span>₹${totalMonthExpenses.toFixed(2)}</span></p>
-                    <p>Remaining Overall Balance: <span class="${remainingBalance >= 0 ? 'positive-remaining' : 'negative-remaining'}">₹${remainingBalance.toFixed(2)}</span></p>
+                <div class="summary-section">
+                    <p><strong>Overall Monthly Budget:</strong> <span>${formatCurrency(currentMonthBudget)}</span></p>
+                    <p><strong>Total Amount Spent:</strong> <span>${formatCurrency(totalMonthExpenses)}</span></p>
+                    <p><strong>Remaining Overall Balance:</strong> <span class="${remainingBalance >= 0 ? 'positive-remaining' : 'negative-remaining'}">${formatCurrency(remainingBalance)}</span></p>
                 </div>
 
                 <h2>Expense Details</h2>
@@ -1230,8 +1192,9 @@
                 const dateA = (a.date instanceof Timestamp) ? a.date.toDate().toISOString().split('T')[0] : a.date;
                 const dateB = (b.date instanceof Timestamp) ? b.date.toDate().toISOString().split('T')[0] : b.date;
                 if (dateB.localeCompare(dateA) !== 0) return dateB.localeCompare(dateA);
-                const timeA = a.createdAt instanceof Timestamp ? a.createdAt.toMillis() : (a.createdAt instanceof Date ? a.createdAt.getTime() : Date.parse(a.date || '1970-01-01'));
-                const timeB = b.createdAt instanceof Timestamp ? b.createdAt.toMillis() : (b.createdAt instanceof Date ? b.createdAt.getTime() : Date.parse(b.date || '1970-01-01'));
+                // Fallback sort by creation time if dates are the same
+                const timeA = a.createdAt instanceof Timestamp ? a.createdAt.toMillis() : (a.createdAt instanceof Date ? a.createdAt.getTime() : 0);
+                const timeB = b.createdAt instanceof Timestamp ? b.createdAt.toMillis() : (b.createdAt instanceof Date ? b.createdAt.getTime() : 0);
                 return timeB - timeA;
             });
 
@@ -1239,25 +1202,25 @@
                 sortedExpensesForPrint.forEach(expense => {
                     let displayDate;
                     if (expense.date instanceof Timestamp) {
-                        displayDate = expense.date.toDate().toLocaleDateString('en-GB');
+                        displayDate = expense.date.toDate().toLocaleDateString('en-GB'); // DD/MM/YYYY
                     } else if (typeof expense.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(expense.date)) {
-                        const parts = expense.date.split('-');
-                        displayDate = `${parts[2]}/${parts[1]}/${parts[0]}`;
-                    } else { displayDate = 'Invalid Date'; }
+                        const parts = expense.date.split('-'); // YYYY-MM-DD
+                        displayDate = `${parts[2]}/${parts[1]}/${parts[0]}`; // DD/MM/YYYY
+                    } else { displayDate = 'N/A'; }
                     reportHTML += `<tr>
-                        <td>${displayDate}</td>
+                        <td>${escapeHTML(displayDate)}</td>
                         <td>${escapeHTML(expense.name)}</td>
                         <td>${escapeHTML(expense.category)}</td>
                         <td class="notes-col">${escapeHTML(expense.notes || '')}</td>
-                        <td class="amount-col">₹${parseFloat(expense.amount || 0).toFixed(2)}</td>
+                        <td class="amount-col">${formatCurrency(expense.amount)}</td>
                     </tr>`;
                 });
             } else {
-                reportHTML += `<tr><td colspan="5" style="text-align:center !important; padding: 20px !important; color: #777777 !important;">No expenses recorded for ${printMonthName}.</td></tr>`;
+                reportHTML += `<tr><td colspan="5" style="text-align:center !important; padding: 10pt !important; color: #333333 !important;">No expenses recorded for ${escapeHTML(printMonthName)}.</td></tr>`;
             }
             reportHTML += `</tbody><tfoot><tr class="total-row">
-                <td colspan="4" style="text-align:right !important;">Total Expenses for ${printMonthName}:</td>
-                <td class="amount-col">₹${totalMonthExpenses.toFixed(2)}</td></tr></tfoot></table>`;
+                <td colspan="4" style="text-align:right !important; padding-right: 5pt !important;"><strong>Total Expenses:</strong></td>
+                <td class="amount-col"><strong>${formatCurrency(totalMonthExpenses)}</strong></td></tr></tfoot></table>`;
 
             const allPrintCategories = Array.from(new Set([
                 ...Object.keys(currentMonthCategoryBudgets).filter(cat => currentMonthCategoryBudgets[cat] > 0 || currentMonthExpenses.some(exp => exp.category === cat)),
@@ -1265,39 +1228,33 @@
             ])).filter(Boolean).sort();
 
             if (allPrintCategories.length > 0) {
-                reportHTML += `<h2>Category Budget Summary</h2><div class="category-summary-print">`;
+                reportHTML += `<h2>Category Budget Summary</h2><div class="summary-section">`;
                 allPrintCategories.forEach(category => {
                     const budget = parseFloat(currentMonthCategoryBudgets[category] || 0);
                     const spent = currentMonthExpenses
                         .filter(exp => exp.category === category)
                         .reduce((sum, exp) => sum + parseFloat(exp.amount || 0), 0);
                     const remainingCatBudget = budget - spent;
-                    let catSpentPercent = budget > 0 ? Math.min(100, (spent / budget) * 100) : (spent > 0 ? 100 : 0);
-                    catSpentPercent = Math.max(0, catSpentPercent);
-                    const progressBarColorClass = remainingCatBudget < 0 && budget > 0 ? 'progress-bar-red' : (budget === 0 && spent > 0 ? 'progress-bar-red' : 'progress-bar-green');
 
                     reportHTML += `
-                    <div class="category-budget-item-print">
-                        <strong>${escapeHTML(category)}:</strong><br>
-                        Budget: ₹${budget.toFixed(2)} | Spent: ₹${spent.toFixed(2)}
-                        <span class="${remainingCatBudget >= 0 ? 'positive-remaining' : 'negative-remaining'}" style="float: right;">(Remaining: ₹${remainingCatBudget.toFixed(2)})</span>
-                        <div style="clear:both;"></div>
-                        <div class="progress-print">
-                            <span class="${progressBarColorClass} progress-bar-print" style="width: ${catSpentPercent}%;">${catSpentPercent.toFixed(0)}%</span>
-                        </div>
-                    </div>`;
+                    <p>
+                        <strong>${escapeHTML(category)}:</strong>
+                        Budget: ${formatCurrency(budget)};
+                        Spent: ${formatCurrency(spent)};
+                        Remaining: <span class="${remainingCatBudget >= 0 ? 'positive-remaining' : 'negative-remaining'}">${formatCurrency(remainingCatBudget)}</span>
+                    </p>`;
                 });
                 reportHTML += `</div>`;
             } else {
-                 reportHTML += `<h2>Category Budget Summary</h2><div class="category-summary-print"><p>No category-specific budgets set or expenses categorized for ${printMonthName}.</p></div>`;
+                 reportHTML += `<h2>Category Budget Summary</h2><div class="summary-section"><p>No category-specific budgets set or expenses recorded for ${escapeHTML(printMonthName)}.</p></div>`;
             }
 
             reportHTML += `<div class="footer">Professional Expense Tracker</div></div></body></html>`;
             return reportHTML;
         }
-        // =====================================================================
-        // END OF UPDATED generateExpenseReportHTML FUNCTION
-        // =====================================================================
+        // ====================================================================================
+        // END OF REVISED generateExpenseReportHTML FUNCTION
+        // ====================================================================================
 
 
         window.printExpenses = function() {
@@ -1308,18 +1265,16 @@
             if (!printWindow) { alert("Please allow popups to print expenses."); return; }
 
             printWindow.document.write(reportHTML);
-            printWindow.document.close(); // Necessary for some browsers to start rendering.
-            // Delay print slightly to ensure content is rendered, especially images or complex CSS.
+            printWindow.document.close(); 
             setTimeout(() => {
                 try {
-                    printWindow.focus(); // Ensure the window is focused, helps some browsers.
+                    printWindow.focus(); 
                     printWindow.print();
-                    // printWindow.close(); // Optional: close after printing dialog
                 } catch (e) {
                     console.error("Printing error:", e);
                     alert("Could not initiate print. Please try printing from the new window's menu.");
                 }
-            }, 500);
+            }, 500); // Increased delay slightly to ensure rendering, especially on slower devices
         }
 
         if(mailExpenseReportButton) mailExpenseReportButton.addEventListener('click', () => {
@@ -1328,30 +1283,32 @@
                 return;
             }
             const reportHTML = generateExpenseReportHTML();
-            if (!reportHTML) return; // Alert is handled in generateExpenseReportHTML
+            if (!reportHTML) return;
 
             const subject = `Expense Report for ${printMonthYearDisplay.textContent || selectedMonthYear}`;
-
-            // For better email client compatibility, we'll URL encode the HTML.
-            // However, mailto has length limits.
-            const body = reportHTML;
-            let mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
-            if (mailtoLink.length > 2000) { // Common conservative limit
-                console.warn(`Mailto link is very long (${mailtoLink.length} characters) and may not work in all email clients.`);
-                alert("The expense report is very long and might not fit entirely in an email link. Please consider printing to PDF and attaching it manually if you encounter issues.");
-                // As a fallback, or alternative, you could offer to copy to clipboard:
-                // navigator.clipboard.writeText(reportHTML).then(() => alert('Report HTML copied to clipboard! You can paste it into your email.'))
-                // .catch(err => console.error('Failed to copy report HTML: ', err));
-                // For now, we'll still attempt to open the mailto link.
-            }
-
-            // Attempt to open the mail client
-             try {
+            const body = "Please find the expense report attached or view the HTML content below. (Note: Pasting HTML directly into email bodies may have varied results depending on the email client.)\n\n" + reportHTML;
+            
+            // Mailto links have length limits, especially with HTML body.
+            // A more robust solution for large reports is to generate a PDF and attach, or provide a link.
+            // For now, we'll try a simplified mailto.
+            let mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}`;
+            
+            // Attempt to open the mail client, user will then paste or attach.
+            try {
                 window.location.href = mailtoLink;
+                alert("Your email client should open. Please paste the report content if needed or consider printing to PDF and attaching it for best results.");
+                // Optionally, copy the HTML to clipboard if supported and desired
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(reportHTML).then(() => {
+                        console.log('Report HTML copied to clipboard.');
+                    }).catch(err => {
+                        console.warn('Failed to copy report HTML to clipboard:', err);
+                    });
+                }
+
             } catch (e) {
                 console.error("Error opening mailto link:", e);
-                alert("Could not open your email client automatically. The report might be too long for a direct email link. You can try printing to PDF and attaching it.");
+                alert("Could not open your email client automatically. You can print the report to PDF and attach it manually.");
             }
         });
 
